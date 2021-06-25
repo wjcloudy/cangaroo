@@ -12,8 +12,26 @@ CandleApiInterface::CandleApiInterface(CandleApiDriver *driver, candle_handle ha
     _numTxErr(0)
 {
     _settings.setBitrate(500000);
-    _settings.setSamplePoint(0.875);
+    _settings.setSamplePoint(875);
 
+
+
+    // Timings for 170MHz processors (CANable 2.0)
+    // Tseg1: 2..256 Tseg2: 2..128 sjw: 1..128 brp: 1..512
+    // Note: as expressed below, Tseg1 does not include 1 count for prop phase
+    _timings
+        << CandleApiTiming(170000000,   10000, 875, 68, 217, 31)
+        << CandleApiTiming(170000000,   20000, 875, 34, 217, 31)
+        << CandleApiTiming(170000000,   50000, 875, 17, 173, 25)
+        << CandleApiTiming(170000000,   83333, 875,  8, 221, 32)
+        << CandleApiTiming(170000000,  100000, 875, 10, 147, 21)
+        << CandleApiTiming(170000000,  125000, 875, 8,  147, 21)
+        << CandleApiTiming(170000000,  250000, 875, 4,  147, 21)
+        << CandleApiTiming(170000000,  500000, 875, 2,  147, 21)
+        << CandleApiTiming(170000000, 1000000, 875, 1,  147, 21);
+
+
+    // Timings for 48MHz processors (CANable 0.X)
     _timings
         // sample point: 50.0%
         << CandleApiTiming(48000000,   10000, 500, 300, 6, 8)
