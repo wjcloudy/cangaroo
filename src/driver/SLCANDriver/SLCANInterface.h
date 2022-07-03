@@ -22,7 +22,9 @@
 #pragma once
 
 #include "../CanInterface.h"
-#include <linux/can/netlink.h> // EMZ remove
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
+#include <QMutex>
 
 // Maximum rx buffer len
 #define SLCAN_MTU 138 + 1 + 16 // canfd 64 frame plus \r plus some padding
@@ -41,7 +43,6 @@ typedef struct {
     uint32_t sample_point;
     uint32_t ctrl_mode;
     uint32_t restart_ms;
-    struct can_bittiming bit_timing;
 } can_config_t;
 
 typedef struct {
@@ -106,9 +107,15 @@ private:
 
     int _idx;
     int _fd;
+    QSerialPort* _serport;
+    QMutex _serport_mutex;
     QString _name;
+    char _rx_linbuf[SLCAN_MTU];
+    int _rx_linbuf_ctr;
     char _rxbuf[SLCAN_MTU * 2];
-    int _rxbuf_pos;
+    int _rxbuf_head;
+    int _rxbuf_tail;
+    QMutex _rxbuf_mutex;
 
     can_config_t _config;
     can_status_t _status;
@@ -116,6 +123,7 @@ private:
 
     const char *cname();
     bool updateStatus();
+    bool parseMessage(CanMessage &msg);
 
     QString buildIpRouteCmd(const MeasurementInterface &mi);
     QStringList buildCanIfConfigArgs(const MeasurementInterface &mi);

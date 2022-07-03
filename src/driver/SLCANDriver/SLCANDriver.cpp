@@ -25,17 +25,17 @@
 #include <core/Backend.h>
 #include <driver/GenericCanSetupPage.h>
 
-#include <sys/socket.h>
-#include <linux/if.h>
-#include <linux/if_arp.h>
-#include <linux/can/netlink.h>
-#include <netlink/route/link.h>
-#include <netlink/route/link/can.h>
 #include <errno.h>
 #include <cstring>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+
+//
+#include <QCoreApplication>
+#include <QDebug>
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
 
 SLCANDriver::SLCANDriver(Backend &backend)
   : CanDriver(backend),
@@ -77,10 +77,27 @@ bool SLCANDriver::update() {
 
     // TODO: Cross platform enumerate all serial ports available, add interfaces for each
 
-    SLCANInterface *intf = createOrUpdateInterface(0, "/dev/pts/3");
     //intf->readConfigFromLink(link);
 
+    int interface_cnt = 0;
 
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+        fprintf(stderr, "Name : %s \r\n",  info.portName().toStdString().c_str());
+        fprintf(stderr, "Description : %s \r\n", info.description().toStdString().c_str());
+        fprintf(stderr, "Manufacturer: %s \r\n", info.manufacturer().toStdString().c_str());
+
+        if(info.description().contains("CANable"))
+        {
+
+            perror("This is a CANable device!");
+            SLCANInterface *intf = createOrUpdateInterface(interface_cnt, info.portName());
+            interface_cnt++;
+        }
+        else
+        {
+            perror("This is not a CANable device!");
+        }
+    }
 
     return true;
 }
@@ -102,7 +119,8 @@ SLCANInterface *SLCANDriver::createOrUpdateInterface(int index, QString name) {
 	}
 
 
-    SLCANInterface *scif = new SLCANInterface(this, index, name);
+    //SLCANInterface *scif = new SLCANInterface(this, index, name);
+    SLCANInterface *scif = new SLCANInterface(this, index, "/dev/pts/3");
     addInterface(scif);
     return scif;
 }

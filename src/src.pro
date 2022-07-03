@@ -4,6 +4,7 @@ QT += core gui
 QT += widgets
 QT += xml
 QT += charts
+QT += serialport
 
 TARGET = cangaroo
 TEMPLATE = app
