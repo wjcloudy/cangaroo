@@ -37,8 +37,10 @@
 #include <window/CanStatusWindow/CanStatusWindow.h>
 #include <window/RawTxWindow/RawTxWindow.h>
 
+
 #if defined(__linux__)
 #include <driver/SocketCanDriver/SocketCanDriver.h>
+#include <driver/SLCANDriver/SLCANDriver.h>
 #else
 #include <driver/CandleApiDriver/CandleApiDriver.h>
 #endif
@@ -76,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #else
     Backend::instance().addCanDriver(*(new CandleApiDriver(Backend::instance())));
 #endif
+    Backend::instance().addCanDriver(*(new SLCANDriver(Backend::instance())));
 
     setWorkspaceModified(false);
     newWorkspace();
