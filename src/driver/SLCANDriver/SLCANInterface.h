@@ -127,6 +127,4 @@ private:
     bool updateStatus();
     bool parseMessage(CanMessage &msg);
 
-    QString buildIpRouteCmd(const MeasurementInterface &mi);
-    QStringList buildCanIfConfigArgs(const MeasurementInterface &mi);
 };

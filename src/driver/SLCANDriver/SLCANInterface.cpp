@@ -67,7 +67,7 @@ QList<CanTiming> SLCANInterface::getAvailableBitrates()
 {
     QList<CanTiming> retval;
     QList<unsigned> bitrates({10000, 20000, 50000, 83333, 100000, 125000, 250000, 500000, 800000, 1000000});
-    QList<unsigned> samplePoints({500, 625, 750, 875});
+    QList<unsigned> samplePoints({875});
 
     unsigned i=0;
     foreach (unsigned br, bitrates) {
@@ -79,94 +79,12 @@ QList<CanTiming> SLCANInterface::getAvailableBitrates()
     return retval;
 }
 
-QString SLCANInterface::buildIpRouteCmd(const MeasurementInterface &mi)
-{
-    QStringList cmd;
-    cmd.append("ip");
-    cmd.append("link");
-    cmd.append("set");
-    cmd.append(getName());
-    cmd.append("up");
-    cmd.append("type");
-    cmd.append("can");
-
-    cmd.append("bitrate");
-    cmd.append(QString().number(mi.bitrate()));
-    cmd.append("sample-point");
-    cmd.append(QString().number((float)mi.samplePoint()/1000.0, 'f', 3));
-
-    if (mi.isCanFD()) {
-        cmd.append("dbitrate");
-        cmd.append(QString().number(mi.fdBitrate()));
-        cmd.append("dsample-point");
-        cmd.append(QString().number((float)mi.fdSamplePoint()/1000.0, 'f', 3));
-        cmd.append("fd");
-        cmd.append("on");
-    }
-
-    cmd.append("restart-ms");
-    if (mi.doAutoRestart()) {
-        cmd.append(QString().number(mi.autoRestartMs()));
-    } else {
-        cmd.append("0");
-    }
-
-    return cmd.join(' ');
-}
-
-QStringList SLCANInterface::buildCanIfConfigArgs(const MeasurementInterface &mi)
-{
-    QStringList args;
-    args << "-d";
-    args << "-i" << getName();
-    args << "-b" << QString::number(mi.bitrate());
-    args << "-p" << QString::number(mi.samplePoint());
-    args << "-u";
-    return args;
-}
-
 
 void SLCANInterface::applyConfig(const MeasurementInterface &mi)
 {
+    // Save settings for port configuration
     _settings = mi;
-    /*
-    if (!mi.doConfigure()) {
-        log_info(QString("interface %1 not managed by cangaroo, not touching configuration").arg(getName()));
-        return;
-    }
-
-    log_info(QString("calling canifconfig to reconfigure interface %1").arg(getName()));
-    QStringList sl = buildCanIfConfigArgs(mi);
-    sl.prepend("canifconfig");
-    log_info(sl.join(" "));
-
-    QProcess canIfConfig;
-    canIfConfig.start("canifconfig", buildCanIfConfigArgs(mi));
-    if (!canIfConfig.waitForFinished()) {
-        log_error(QString("timeout waiting for canifconfig"));
-        return;
-    }
-
-    if (canIfConfig.exitStatus()!=QProcess::NormalExit) {
-        log_error(QString("canifconfig crashed"));
-        return;
-    }
-
-    if (canIfConfig.exitCode() != 0) {
-        log_error(QString("canifconfig failed: ") + QString(canIfConfig.readAllStandardError()).trimmed());
-        return;
-    } */
-
 }
-
-#if (LIBNL_CURRENT<=216)
-#warning we need at least libnl3 version 3.2.22 to be able to get link status via netlink
-int rtnl_link_can_state(struct rtnl_link *link, uint32_t *state) {
-    (void) link;
-    (void) state;
-    return -1;
-}
-#endif
 
 bool SLCANInterface::updateStatus()
 {
@@ -330,15 +248,12 @@ void SLCANInterface::open()
     });
 
 
-    // TODO: Configure bitrate, open port
-
-
+    // Set the CAN bitrate
     switch(_settings.bitrate())
     {
         case 1000000:
             _serport->write("S8\r", 3);
             _serport->flush();
-            fprintf(stderr, "Got 1meg\r\n");
             break;
         case 750000:
             _serport->write("S7\r", 3);
@@ -360,6 +275,10 @@ void SLCANInterface::open()
             _serport->write("S3\r", 3);
             _serport->flush();
             break;
+        case 83333:
+            _serport->write("S9\r", 3);
+            _serport->flush();
+            break;
         case 50000:
             _serport->write("S2\r", 3);
             _serport->flush();
@@ -379,32 +298,29 @@ void SLCANInterface::open()
             break;
     }
 
-    fprintf(stderr, "Configured bitrate of %d\r\n", _settings.bitrate());
-
     // Open the port
-    //_serport->write("S8\r", 3);
-    //usleep(200000);
     _serport->write("O\r", 2);
     _serport->flush();
 
-
+    // Release port mutex
     _serport_mutex.unlock();
 }
 
-void SLCANInterface::close() {
-
+void SLCANInterface::close()
+{
     _serport_mutex.lock();
 
     if (_serport->isOpen())
     {
         // Close CAN port
-        _serport->write("C\r\n", 3);
+        _serport->write("C\r", 2);
         _serport->flush();
 
         _serport->flush();
         _serport->clear();
         _serport->close();
     }
+
     _serport_mutex.unlock();
 }
 

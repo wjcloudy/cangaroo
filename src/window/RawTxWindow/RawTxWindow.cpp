@@ -36,9 +36,10 @@ RawTxWindow::RawTxWindow(QWidget *parent, Backend &backend) :
 
     connect(ui->singleSendButton, SIGNAL(released()), this, SLOT(sendRawMessage()));
     connect(ui->repeatSendButton, SIGNAL(toggled(bool)), this, SLOT(sendRepeatMessage(bool)));
-    connect(ui->refreshInterfacesButton, SIGNAL(released()), this, SLOT(refreshInterfaces()));
 
     connect(ui->spinBox_RepeatRate, SIGNAL(valueChanged(int)), this, SLOT(changeRepeatRate(int)));
+
+    connect(&backend, SIGNAL(onSetupChanged()),  this, SLOT(refreshInterfaces()));
 
     // Timer for repeating messages
     repeatmsg_timer = new QTimer(this);
@@ -48,9 +49,11 @@ RawTxWindow::RawTxWindow(QWidget *parent, Backend &backend) :
     // TODO: Grey out checkboxes that are invalid depending on DLC spinbox state
     connect(ui->fieldDLC, SIGNAL(valueChanged(int)), this, SLOT(changeDLC(int)));
 
-
+    // Disable TX until interfaces are present
+    this->setDisabled(1);
 
 }
+
 
 RawTxWindow::~RawTxWindow()
 {
@@ -123,14 +126,45 @@ void RawTxWindow::sendRepeatMessage(bool enable)
     }
 }
 
+
+
+
+void RawTxWindow::disableTxWindow(int disable)
+{
+    if(disable)
+    {
+        this->setDisabled(1);
+    }
+    else
+    {
+        // Only enable if an interface is present
+        if(_backend.getInterfaceList().count() > 0)
+            this->setDisabled(0);
+        else
+            this->setDisabled(1);
+    }
+}
+
 void RawTxWindow::refreshInterfaces()
 {
     ui->comboBoxInterface->clear();
 
+    int cb_idx = 0;
+
+    // TODO: Only show interfaces that are included in active MeasurementInterfaces!
     foreach (CanInterfaceId ifid, _backend.getInterfaceList()) {
         CanInterface *intf = _backend.getInterfaceById(ifid);
         ui->comboBoxInterface->addItem(intf->getName() + " " + intf->getDriver()->getName());
+        ui->comboBoxInterface->setItemData(cb_idx, QVariant(ifid));
+        fprintf(stderr, "Refresh interface, CBXID=%d IFID=%d\r\n", cb_idx, ifid);
+        cb_idx++;
     }
+
+    if(cb_idx == 0)
+        disableTxWindow(1);
+    else
+        disableTxWindow(0);
+
 }
 
 void RawTxWindow::sendRawMessage()
@@ -171,18 +205,15 @@ void RawTxWindow::sendRawMessage()
     msg.setRTR(en_rtr);
     msg.setErrorFrame(en_errorframe);
 
-
-    foreach (CanInterfaceId ifid, _backend.getInterfaceList()) {
-        CanInterface *intf = _backend.getInterfaceById(ifid);
-        intf->sendMessage(msg);
+    CanInterface *intf = _backend.getInterfaceById((CanInterfaceId)ui->comboBoxInterface->currentData().toUInt());
+    intf->sendMessage(msg);
 
 
-        char outmsg[256];
-        snprintf(outmsg, 256, "Send [%s] to %d on port %s [ext=%u rtr=%u err=%u]",
-                 msg.getDataHexString().toLocal8Bit().constData(), msg.getId(), _backend.getInterfaceById(ifid)->getName().toLocal8Bit().constData(),
-                 msg.isExtended(), msg.isRTR(), msg.isErrorFrame());
-        log_info(outmsg);
-    }
+    char outmsg[256];
+    snprintf(outmsg, 256, "Send [%s] to %d on port %s [ext=%u rtr=%u err=%u]",
+             msg.getDataHexString().toLocal8Bit().constData(), msg.getId(), intf->getName().toLocal8Bit().constData(),
+             msg.isExtended(), msg.isRTR(), msg.isErrorFrame());
+    log_info(outmsg);
 
 }
 
