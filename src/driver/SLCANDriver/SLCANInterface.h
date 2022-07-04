@@ -60,7 +60,7 @@ typedef struct {
 
 class SLCANInterface: public CanInterface {
 public:
-    SLCANInterface(SLCANDriver *driver, int index, QString name);
+    SLCANInterface(SLCANDriver *driver, int index, QString name, bool fd_support);
     virtual ~SLCANInterface();
 
     virtual QString getName() const;
@@ -107,7 +107,6 @@ private:
     } ts_mode_t;
 
     int _idx;
-    int _fd;
     QSerialPort* _serport;
     QMutex _serport_mutex;
     QString _name;

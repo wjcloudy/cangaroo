@@ -36,10 +36,9 @@
 #include <QtSerialPort/QSerialPortInfo>
 
 
-SLCANInterface::SLCANInterface(SLCANDriver *driver, int index, QString name)
+SLCANInterface::SLCANInterface(SLCANDriver *driver, int index, QString name, bool fd_support)
   : CanInterface((CanDriver *)driver),
 	_idx(index),
-    _fd(0),
     _name(name),
     _ts_mode(ts_mode_SIOCSHWTSTAMP),
     _serport(new QSerialPort()),
@@ -50,6 +49,8 @@ SLCANInterface::SLCANInterface(SLCANDriver *driver, int index, QString name)
     // Set defaults
     _settings.setBitrate(500000);
     _settings.setSamplePoint(875);
+
+    _config.supports_canfd = fd_support;
 }
 
 SLCANInterface::~SLCANInterface() {
@@ -67,12 +68,16 @@ QList<CanTiming> SLCANInterface::getAvailableBitrates()
 {
     QList<CanTiming> retval;
     QList<unsigned> bitrates({10000, 20000, 50000, 83333, 100000, 125000, 250000, 500000, 800000, 1000000});
+    QList<unsigned> bitrates_fd({0, 2000000, 5000000});
+
     QList<unsigned> samplePoints({875});
 
     unsigned i=0;
     foreach (unsigned br, bitrates) {
-        foreach (unsigned sp, samplePoints) {
-            retval << CanTiming(i++, br, 0, sp);
+        foreach(unsigned br_fd, bitrates_fd) {
+            foreach (unsigned sp, samplePoints) {
+                retval << CanTiming(i++, br, br_fd, sp);
+            }
         }
     }
 
@@ -248,7 +253,7 @@ void SLCANInterface::open()
     });
 
 
-    // Set the CAN bitrate
+    // Set the classic CAN bitrate
     switch(_settings.bitrate())
     {
         case 1000000:
@@ -296,6 +301,22 @@ void SLCANInterface::open()
             _serport->write("S0\r", 3);
             _serport->flush();
             break;
+    }
+
+    // Set configured BRS rate
+    if(_config.supports_canfd)
+    {
+        switch(_settings.fdBitrate())
+        {
+            case 2000000:
+                _serport->write("Y2\r", 3);
+                _serport->flush();
+                break;
+            case 5000000:
+                _serport->write("Y5\r", 3);
+                _serport->flush();
+                break;
+        }
     }
 
     // Open the port
