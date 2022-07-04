@@ -103,7 +103,7 @@ bool SLCANDriver::update() {
 }
 
 QString SLCANDriver::getName() {
-    return "SLCAN";
+    return "CANable SLCAN";
 }
 
 
@@ -119,8 +119,8 @@ SLCANInterface *SLCANDriver::createOrUpdateInterface(int index, QString name) {
 	}
 
 
-    //SLCANInterface *scif = new SLCANInterface(this, index, name);
-    SLCANInterface *scif = new SLCANInterface(this, index, "/dev/pts/3");
+    SLCANInterface *scif = new SLCANInterface(this, index, name);
+    //SLCANInterface *scif = new SLCANInterface(this, index, "/dev/pts/3");
     addInterface(scif);
     return scif;
 }
