@@ -37,10 +37,10 @@
 #include <window/CanStatusWindow/CanStatusWindow.h>
 #include <window/RawTxWindow/RawTxWindow.h>
 
+#include <driver/SLCANDriver/SLCANDriver.h>
 
 #if defined(__linux__)
 #include <driver/SocketCanDriver/SocketCanDriver.h>
-#include <driver/SLCANDriver/SLCANDriver.h>
 #else
 #include <driver/CandleApiDriver/CandleApiDriver.h>
 #endif

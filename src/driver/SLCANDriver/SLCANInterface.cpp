@@ -35,11 +35,6 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
-
 
 SLCANInterface::SLCANInterface(SLCANDriver *driver, int index, QString name)
   : CanInterface((CanDriver *)driver),
@@ -52,6 +47,9 @@ SLCANInterface::SLCANInterface(SLCANDriver *driver, int index, QString name)
     _rxbuf_tail(0),
     _rx_linbuf_ctr(0)
 {
+    // Set defaults
+    _settings.setBitrate(500000);
+    _settings.setSamplePoint(875);
 }
 
 SLCANInterface::~SLCANInterface() {
@@ -130,6 +128,7 @@ QStringList SLCANInterface::buildCanIfConfigArgs(const MeasurementInterface &mi)
 
 void SLCANInterface::applyConfig(const MeasurementInterface &mi)
 {
+    _settings = mi;
     /*
     if (!mi.doConfigure()) {
         log_info(QString("interface %1 not managed by cangaroo, not touching configuration").arg(getName()));
@@ -330,14 +329,78 @@ void SLCANInterface::open()
 
     });
 
+
+    // TODO: Configure bitrate, open port
+
+
+    switch(_settings.bitrate())
+    {
+        case 1000000:
+            _serport->write("S8\r", 3);
+            _serport->flush();
+            fprintf(stderr, "Got 1meg\r\n");
+            break;
+        case 750000:
+            _serport->write("S7\r", 3);
+            _serport->flush();
+            break;
+        case 500000:
+            _serport->write("S6\r", 3);
+            _serport->flush();
+            break;
+        case 250000:
+            _serport->write("S5\r", 3);
+            _serport->flush();
+            break;
+        case 125000:
+            _serport->write("S4\r", 3);
+            _serport->flush();
+            break;
+        case 100000:
+            _serport->write("S3\r", 3);
+            _serport->flush();
+            break;
+        case 50000:
+            _serport->write("S2\r", 3);
+            _serport->flush();
+            break;
+        case 20000:
+            _serport->write("S1\r", 3);
+            _serport->flush();
+            break;
+        case 10000:
+            _serport->write("S0\r", 3);
+            _serport->flush();
+            break;
+        default:
+            // Default to 10k
+            _serport->write("S0\r", 3);
+            _serport->flush();
+            break;
+    }
+
+    fprintf(stderr, "Configured bitrate of %d\r\n", _settings.bitrate());
+
+    // Open the port
+    //_serport->write("S8\r", 3);
+    //usleep(200000);
+    _serport->write("O\r", 2);
+    _serport->flush();
+
+
     _serport_mutex.unlock();
 }
 
 void SLCANInterface::close() {
-   // ::close(_fd);
+
     _serport_mutex.lock();
+
     if (_serport->isOpen())
     {
+        // Close CAN port
+        _serport->write("C\r\n", 3);
+        _serport->flush();
+
         _serport->flush();
         _serport->clear();
         _serport->close();
@@ -422,11 +485,11 @@ void SLCANInterface::sendMessage(const CanMessage &msg) {
     // Add CR for slcan EOL
     buf[msg_idx++] = '\r';
 
-//    _serport_mutex.lock();
-//    // Write string to serial device
-//    _serport->write(buf, msg_idx);
-//    _serport->flush();
-//    _serport_mutex.unlock();
+    _serport_mutex.lock();
+    // Write string to serial device
+    _serport->write(buf, msg_idx);
+    _serport->flush();
+    _serport_mutex.unlock();
 }
 
 bool SLCANInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)

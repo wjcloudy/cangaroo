@@ -22,6 +22,7 @@
 #pragma once
 
 #include "../CanInterface.h"
+#include <core/MeasurementInterface.h>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 #include <QMutex>
@@ -116,6 +117,7 @@ private:
     int _rxbuf_head;
     int _rxbuf_tail;
     QMutex _rxbuf_mutex;
+    MeasurementInterface _settings;
 
     can_config_t _config;
     can_status_t _status;

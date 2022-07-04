@@ -47,6 +47,7 @@ private slots:
     void changeDLC(int dlc);
     void changeRepeatRate(int ms);
     void sendRepeatMessage(bool enable);
+    void refreshInterfaces();
     void sendRawMessage();
 
 

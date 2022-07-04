@@ -36,6 +36,7 @@ RawTxWindow::RawTxWindow(QWidget *parent, Backend &backend) :
 
     connect(ui->singleSendButton, SIGNAL(released()), this, SLOT(sendRawMessage()));
     connect(ui->repeatSendButton, SIGNAL(toggled(bool)), this, SLOT(sendRepeatMessage(bool)));
+    connect(ui->refreshInterfacesButton, SIGNAL(released()), this, SLOT(refreshInterfaces()));
 
     connect(ui->spinBox_RepeatRate, SIGNAL(valueChanged(int)), this, SLOT(changeRepeatRate(int)));
 
@@ -46,6 +47,8 @@ RawTxWindow::RawTxWindow(QWidget *parent, Backend &backend) :
 
     // TODO: Grey out checkboxes that are invalid depending on DLC spinbox state
     connect(ui->fieldDLC, SIGNAL(valueChanged(int)), this, SLOT(changeDLC(int)));
+
+
 
 }
 
@@ -117,6 +120,16 @@ void RawTxWindow::sendRepeatMessage(bool enable)
     else
     {
         repeatmsg_timer->stop();
+    }
+}
+
+void RawTxWindow::refreshInterfaces()
+{
+    ui->comboBoxInterface->clear();
+
+    foreach (CanInterfaceId ifid, _backend.getInterfaceList()) {
+        CanInterface *intf = _backend.getInterfaceById(ifid);
+        ui->comboBoxInterface->addItem(intf->getName() + " " + intf->getDriver()->getName());
     }
 }
 
