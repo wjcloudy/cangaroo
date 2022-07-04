@@ -454,6 +454,11 @@ bool SLCANInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
 
 bool SLCANInterface::parseMessage(CanMessage &msg)
 {
+    // Set timestamp to current time
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    msg.setTimestamp(tv);
+
     // Defaults
     msg.setErrorFrame(0);
     msg.setInterfaceId(getId());
