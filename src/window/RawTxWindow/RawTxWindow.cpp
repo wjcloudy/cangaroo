@@ -39,6 +39,8 @@ RawTxWindow::RawTxWindow(QWidget *parent, Backend &backend) :
 
     connect(ui->spinBox_RepeatRate, SIGNAL(valueChanged(int)), this, SLOT(changeRepeatRate(int)));
 
+    connect(ui->comboBoxInterface, SIGNAL(currentIndexChanged(int)), this, SLOT(updateCapabilities()));
+
     connect(&backend, SIGNAL(onSetupChanged()),  this, SLOT(refreshInterfaces()));
 
     // Timer for repeating messages
@@ -108,6 +110,29 @@ void RawTxWindow::changeDLC(int dlc)
 //    repeatmsg_timer->setInterval(ms);
 }
 
+void RawTxWindow::updateCapabilities()
+{
+
+    // check if intf suports fd, if, enable, else dis
+    //CanInterface *intf = _backend.getInterfaceById(idx);
+    if(ui->comboBoxInterface->count() > 0)
+    {
+        CanInterface *intf = _backend.getInterfaceById((CanInterfaceId)ui->comboBoxInterface->currentData().toUInt());
+        if(intf == NULL)
+        {
+            return;
+        }
+
+        if(intf->getCapabilities() & intf->capability_canfd)
+        {
+            ui->checkbox_BRS->setDisabled(0);
+        }
+        else
+        {
+            ui->checkbox_BRS->setDisabled(1);
+        }
+    }
+}
 
 void RawTxWindow::changeRepeatRate(int ms)
 {
@@ -165,6 +190,7 @@ void RawTxWindow::refreshInterfaces()
     else
         disableTxWindow(0);
 
+    updateCapabilities();
 }
 
 void RawTxWindow::sendRawMessage()

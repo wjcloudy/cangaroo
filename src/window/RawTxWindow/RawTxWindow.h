@@ -45,6 +45,7 @@ public:
 
 private slots:
     void changeDLC(int dlc);
+    void updateCapabilities();
     void changeRepeatRate(int ms);
     void sendRepeatMessage(bool enable);
     void disableTxWindow(int disable);
