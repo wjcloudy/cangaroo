@@ -86,7 +86,7 @@ bool SLCANDriver::update() {
         fprintf(stderr, "Description : %s \r\n", info.description().toStdString().c_str());
         fprintf(stderr, "Manufacturer: %s \r\n", info.manufacturer().toStdString().c_str());
 
-        if(info.description().contains("CANable"))
+        if(info.description().contains("CANable") || info.vendorIdentifier() == 0xad50)
         {
 
             perror("This is a CANable device!");
