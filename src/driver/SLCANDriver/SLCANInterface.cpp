@@ -215,9 +215,9 @@ void SLCANInterface::open()
     _serport->setFlowControl(QSerialPort::NoFlowControl);
     _serport->setReadBufferSize(2048);
     if (_serport->open(QIODevice::ReadWrite)) {
-        perror("Serport connected!");
+        //perror("Serport connected!");
     } else {
-        perror("Serport failed!");
+        perror("Serport connect failed!");
         return;
     }
     _serport->flush();
@@ -225,31 +225,26 @@ void SLCANInterface::open()
 
     QObject::connect(_serport, &QSerialPort::readyRead, [&]
     {
-        //this is called when readyRead() is emitted
-        fprintf(stderr, "New data available: %d\r\n", _serport->bytesAvailable());
+        // This is called when readyRead() is emitted
         QByteArray datas = _serport->readAll();
         for(int i=0; i<datas.count(); i++)
         {
-            fprintf(stderr, "%c ", datas.at(i));
-
             _rxbuf_mutex.lock();
 
-            // If buffer overflowed, reset.
-            // TODO: Check for buffer overflow
-            //{
-            //    perror("RXbuf overflowed!")
-            //    _rxbuf_pos = 0;
-            //}
-            //else
-           // {
+            // If incrementing the head will hit the tail, we've filled the buffer. Reset and discard all data.
+            if(((_rxbuf_head + 1) % RXCIRBUF_LEN) == _rxbuf_tail)
+            {
+                _rxbuf_head = 0;
+                _rxbuf_tail = 0;
+            }
+            else
+            {
                 // Put inbound data at the head locatoin
                 _rxbuf[_rxbuf_head] = datas.at(i);
-                _rxbuf_head = (_rxbuf_head + 1) % SLCAN_MTU; // Wrap at MTU
-            //}
+                _rxbuf_head = (_rxbuf_head + 1) % RXCIRBUF_LEN; // Wrap at MTU
+            }
             _rxbuf_mutex.unlock();
         }
-        fprintf(stderr, "\r\n");
-
     });
 
 
@@ -347,22 +342,37 @@ void SLCANInterface::close()
 
 void SLCANInterface::sendMessage(const CanMessage &msg) {
 
-
     // SLCAN_MTU
     char buf[SLCAN_MTU] = {0};
 
     uint8_t msg_idx = 0;
 
+    // Message is FD
     // Add character for frame type
-    if (msg.isRTR()) {
-        buf[msg_idx] = 'r';
+    if(msg.isFD())
+    {
+        if(msg.isBRS())
+        {
+            buf[msg_idx] = 'b';
+
+        }
+        else
+        {
+            buf[msg_idx] = 'd';
+        }
     }
+    // Message is not FD
+    // Add character for frame type
     else
     {
-        buf[msg_idx] = 't';
+        if (msg.isRTR()) {
+            buf[msg_idx] = 'r';
+        }
+        else
+        {
+            buf[msg_idx] = 't';
+        }
     }
-
-
 
     // Assume standard identifier
     uint8_t id_len = SLCAN_STD_ID_LEN;
@@ -389,15 +399,40 @@ void SLCANInterface::sendMessage(const CanMessage &msg) {
     // Sanity check length
     int8_t bytes = msg.getLength();
 
-    // TODO: CANFD
-    if(bytes > 8)
-        bytes = 8;
-    // Check bytes value
-//    if(bytes < 0)
-//        return -1;
-//    if(bytes > 64)
-//        return -1;
 
+    if(bytes < 0)
+        return;
+    if(bytes > 64)
+        return;
+
+    // If canfd
+    if(bytes > 8)
+    {
+        switch(bytes)
+        {
+        case 12:
+            bytes = 0x9;
+            break;
+        case 16:
+            bytes = 0xA;
+            break;
+        case 20:
+            bytes = 0xB;
+            break;
+        case 24:
+            bytes = 0xC;
+            break;
+        case 32:
+            bytes = 0xD;
+            break;
+        case 48:
+            bytes = 0xE;
+            break;
+        case 64:
+            bytes = 0xF;
+            break;
+        }
+    }
 
     // Add DLC to buffer
     buf[msg_idx++] = bytes;
@@ -439,17 +474,7 @@ bool SLCANInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
         // Save data if room
         if(_rx_linbuf_ctr < SLCAN_MTU)
         {
-            fprintf(stderr, "Saving data to linbuf: %c\r\n", _rxbuf[_rxbuf_tail]);
             _rx_linbuf[_rx_linbuf_ctr++] = _rxbuf[_rxbuf_tail];
-
-            //
-            fprintf(stderr, "Linbuf contents:\r\n");
-
-            for(int i=0; i<_rx_linbuf_ctr; i++)
-            {
-                fprintf(stderr, "[%c] ", _rx_linbuf[i]);
-            }
-            fprintf(stderr,"\r\n");
 
             // If we have a newline, then we just finished parsing a CAN message.
             if(_rxbuf[_rxbuf_tail] == '\r')
@@ -457,17 +482,15 @@ bool SLCANInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
                 ret = parseMessage(msg);
                 _rx_linbuf_ctr = 0;
             }
-
         }
         // Discard data if not
         else
         {
-            fprintf(stderr, "Ran out of room!\r\n");
+            perror("Linbuf full");
             _rx_linbuf_ctr = 0;
         }
 
-
-        _rxbuf_tail = (_rxbuf_tail + 1) % SLCAN_MTU; // Wrap at MTU
+        _rxbuf_tail = (_rxbuf_tail + 1) % RXCIRBUF_LEN;
     }
     _rxbuf_mutex.unlock();
     return ret;
@@ -485,6 +508,7 @@ bool SLCANInterface::parseMessage(CanMessage &msg)
     msg.setInterfaceId(getId());
     msg.setId(0);
 
+    bool msg_is_fd = false;
 
     // Convert from ASCII (2nd character to end)
     for (int i = 1; i < _rx_linbuf_ctr; i++)
@@ -507,11 +531,9 @@ bool SLCANInterface::parseMessage(CanMessage &msg)
 
         // Transmit data frame command
         case 'T':
-            perror("Extended frame!");
             msg.setExtended(1);
             break;
         case 't':
-            perror("Not extended frame!");
             msg.setExtended(0);
             break;
 
@@ -524,6 +546,27 @@ bool SLCANInterface::parseMessage(CanMessage &msg)
             msg.setExtended(1);
             msg.setRTR(1);
             break;
+
+        // CANFD transmit - no BRS
+        case 'd':
+            msg.setExtended(0);
+            msg_is_fd = true;
+            break;
+        case 'D':
+            msg.setExtended(1);
+            msg_is_fd = true;
+            break;
+
+        // CANFD transmit - with BRS
+        case 'b':
+            msg.setExtended(0);
+            msg_is_fd = true;
+            break;
+        case 'B':
+            msg.setExtended(1);
+            msg_is_fd = true;
+            break;
+
 
 
         // Invalid command
@@ -556,15 +599,47 @@ bool SLCANInterface::parseMessage(CanMessage &msg)
     // Attempt to parse DLC and check sanity
     uint8_t dlc_code_raw = _rx_linbuf[parse_loc++];
 
-   /* If dlc is too long for an FD frame
-    if(frame_header.FDFormat == FDCAN_FD_CAN && dlc_code_raw > 0xF)
+    // If dlc is too long for an FD frame
+    if(msg_is_fd && dlc_code_raw > 0xF)
     {
-        return -1;
+        return false;
     }
-    if(frame_header.FDFormat == FDCAN_CLASSIC_CAN && dlc_code_raw > 0x8)
+    if(!msg_is_fd && dlc_code_raw > 0x8)
     {
-        return -1;
-    }*/
+        return false;
+    }
+
+    if(dlc_code_raw > 0x8)
+    {
+        switch(dlc_code_raw)
+        {
+        case 0x9:
+            dlc_code_raw = 12;
+            break;
+        case 0xA:
+            dlc_code_raw = 16;
+            break;
+        case 0xB:
+            dlc_code_raw = 20;
+            break;
+        case 0xC:
+            dlc_code_raw = 24;
+            break;
+        case 0xD:
+            dlc_code_raw = 32;
+            break;
+        case 0xE:
+            dlc_code_raw = 48;
+            break;
+        case 0xF:
+            dlc_code_raw = 64;
+            break;
+        default:
+            dlc_code_raw = 0;
+            perror("Invalid length");
+            break;
+        }
+    }
 
     msg.setLength(dlc_code_raw);
 

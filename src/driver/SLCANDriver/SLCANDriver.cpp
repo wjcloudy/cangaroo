@@ -49,53 +49,23 @@ SLCANDriver::~SLCANDriver() {
 
 bool SLCANDriver::update() {
 
-    /*
-    struct nl_sock *sock = nl_socket_alloc();
-    struct nl_cache *cache;
-
-    nl_connect(sock, NETLINK_ROUTE);
-    int result = rtnl_link_alloc_cache(sock, AF_UNSPEC, &cache);
-
-    if (result < 0) {
-        log_error(QString("Could not access netlink device list: %1").arg(result));
-    } else {
-
-        for (struct nl_object *obj = nl_cache_get_first(cache); obj!=0; obj=nl_cache_get_next(obj)) {
-            struct rtnl_link *link = (struct rtnl_link *)obj;
-
-            if (rtnl_link_get_arptype(link)==ARPHRD_CAN) {
-                SocketCanInterface *intf = createOrUpdateInterface(rtnl_link_get_ifindex(link), QString(rtnl_link_get_name(link)));
-                intf->readConfigFromLink(link);
-            }
-        }
-    }
-
-    nl_cache_free(cache);
-    nl_close(sock);
-    nl_socket_free(sock);
-    */
-
-    // TODO: Cross platform enumerate all serial ports available, add interfaces for each
-
-    //intf->readConfigFromLink(link);
-
     int interface_cnt = 0;
 
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
         fprintf(stderr, "Name : %s \r\n",  info.portName().toStdString().c_str());
-        fprintf(stderr, "Description : %s \r\n", info.description().toStdString().c_str());
-        fprintf(stderr, "Manufacturer: %s \r\n", info.manufacturer().toStdString().c_str());
+        fprintf(stderr, "   Description : %s \r\n", info.description().toStdString().c_str());
+        fprintf(stderr, "   Manufacturer: %s \r\n", info.manufacturer().toStdString().c_str());
 
         if(info.description().contains("CANable") || info.vendorIdentifier() == 0xad50)
         {
 
-            perror("This is a CANable device!");
+            perror("   !! This is a CANable device!");
             SLCANInterface *intf = createOrUpdateInterface(interface_cnt, info.portName(), true);
             interface_cnt++;
         }
         else
         {
-            perror("This is not a CANable device!");
+            perror("   !! This is not a CANable device!");
         }
     }
 

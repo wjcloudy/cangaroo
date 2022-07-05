@@ -32,7 +32,7 @@
 #define SLCAN_STD_ID_LEN 3
 #define SLCAN_EXT_ID_LEN 8
 
-
+#define RXCIRBUF_LEN (SLCAN_MTU * 2)
 
 class SLCANDriver;
 
@@ -112,9 +112,11 @@ private:
     QString _name;
     char _rx_linbuf[SLCAN_MTU];
     int _rx_linbuf_ctr;
-    char _rxbuf[SLCAN_MTU * 2];
-    int _rxbuf_head;
-    int _rxbuf_tail;
+
+    char _rxbuf[RXCIRBUF_LEN];
+    uint32_t _rxbuf_head;
+    uint32_t _rxbuf_tail;
+
     QMutex _rxbuf_mutex;
     MeasurementInterface _settings;
 

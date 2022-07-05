@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>371</width>
+    <width>422</width>
     <height>174</height>
    </rect>
   </property>
@@ -96,29 +96,10 @@
     <string>Address</string>
    </property>
   </widget>
-  <widget class="QSpinBox" name="fieldDLC">
-   <property name="geometry">
-    <rect>
-     <x>90</x>
-     <y>70</y>
-     <width>31</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="minimum">
-    <number>0</number>
-   </property>
-   <property name="maximum">
-    <number>8</number>
-   </property>
-   <property name="value">
-    <number>8</number>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>100</x>
      <y>50</y>
      <width>28</width>
      <height>17</height>
@@ -131,7 +112,7 @@
   <widget class="QLineEdit" name="fieldByte0">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>150</x>
      <y>70</y>
      <width>21</width>
      <height>20</height>
@@ -150,7 +131,7 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>150</x>
      <y>90</y>
      <width>21</width>
      <height>16</height>
@@ -166,7 +147,7 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>128</x>
+     <x>148</x>
      <y>39</y>
      <width>231</width>
      <height>31</height>
@@ -182,7 +163,7 @@
   <widget class="QLineEdit" name="fieldByte1">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>180</x>
      <y>70</y>
      <width>21</width>
      <height>20</height>
@@ -201,7 +182,7 @@
   <widget class="QLineEdit" name="fieldByte2">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>210</x>
      <y>70</y>
      <width>21</width>
      <height>20</height>
@@ -220,7 +201,7 @@
   <widget class="QLineEdit" name="fieldByte3">
    <property name="geometry">
     <rect>
-     <x>220</x>
+     <x>240</x>
      <y>70</y>
      <width>21</width>
      <height>20</height>
@@ -239,7 +220,7 @@
   <widget class="QLineEdit" name="fieldByte4">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>270</x>
      <y>70</y>
      <width>21</width>
      <height>20</height>
@@ -258,7 +239,7 @@
   <widget class="QLineEdit" name="fieldByte5">
    <property name="geometry">
     <rect>
-     <x>280</x>
+     <x>300</x>
      <y>70</y>
      <width>21</width>
      <height>20</height>
@@ -277,7 +258,7 @@
   <widget class="QLineEdit" name="fieldByte6">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>330</x>
      <y>70</y>
      <width>21</width>
      <height>20</height>
@@ -296,7 +277,7 @@
   <widget class="QLineEdit" name="fieldByte7">
    <property name="geometry">
     <rect>
-     <x>340</x>
+     <x>360</x>
      <y>70</y>
      <width>21</width>
      <height>20</height>
@@ -315,7 +296,7 @@
   <widget class="QLabel" name="label_8">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>180</x>
      <y>90</y>
      <width>21</width>
      <height>16</height>
@@ -331,7 +312,7 @@
   <widget class="QLabel" name="label_10">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>210</x>
      <y>90</y>
      <width>21</width>
      <height>16</height>
@@ -347,7 +328,7 @@
   <widget class="QLabel" name="label_13">
    <property name="geometry">
     <rect>
-     <x>220</x>
+     <x>240</x>
      <y>90</y>
      <width>21</width>
      <height>16</height>
@@ -363,7 +344,7 @@
   <widget class="QLabel" name="label_14">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>270</x>
      <y>90</y>
      <width>21</width>
      <height>16</height>
@@ -379,7 +360,7 @@
   <widget class="QLabel" name="label_15">
    <property name="geometry">
     <rect>
-     <x>280</x>
+     <x>300</x>
      <y>90</y>
      <width>21</width>
      <height>16</height>
@@ -395,7 +376,7 @@
   <widget class="QLabel" name="label_16">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>330</x>
      <y>90</y>
      <width>21</width>
      <height>16</height>
@@ -411,7 +392,7 @@
   <widget class="QLabel" name="label_17">
    <property name="geometry">
     <rect>
-     <x>340</x>
+     <x>360</x>
      <y>90</y>
      <width>21</width>
      <height>16</height>
@@ -505,14 +486,37 @@
   <widget class="QCheckBox" name="checkbox_BRS">
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>310</x>
      <y>110</y>
-     <width>106</width>
+     <width>51</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
-    <string>BRS (FD Only)</string>
+    <string>BRS</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkbox_FD">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>110</y>
+     <width>41</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>FD</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBoxDLC">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>70</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
    </property>
   </widget>
  </widget>

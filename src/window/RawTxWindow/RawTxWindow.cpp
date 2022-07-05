@@ -40,6 +40,7 @@ RawTxWindow::RawTxWindow(QWidget *parent, Backend &backend) :
     connect(ui->spinBox_RepeatRate, SIGNAL(valueChanged(int)), this, SLOT(changeRepeatRate(int)));
 
     connect(ui->comboBoxInterface, SIGNAL(currentIndexChanged(int)), this, SLOT(updateCapabilities()));
+    connect(ui->checkbox_FD, SIGNAL(stateChanged(int)), this, SLOT(updateCapabilities()));
 
     connect(&backend, SIGNAL(onSetupChanged()),  this, SLOT(refreshInterfaces()));
 
@@ -49,7 +50,8 @@ RawTxWindow::RawTxWindow(QWidget *parent, Backend &backend) :
 
 
     // TODO: Grey out checkboxes that are invalid depending on DLC spinbox state
-    connect(ui->fieldDLC, SIGNAL(valueChanged(int)), this, SLOT(changeDLC(int)));
+    //connect(ui->fieldDLC, SIGNAL(valueChanged(int)), this, SLOT(changeDLC(int)));
+    connect(ui->comboBoxDLC, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDLC()));
 
     // Disable TX until interfaces are present
     this->setDisabled(1);
@@ -63,7 +65,7 @@ RawTxWindow::~RawTxWindow()
 }
 
 
-void RawTxWindow::changeDLC(int dlc)
+void RawTxWindow::changeDLC()
 {
     ui->fieldByte0->setEnabled(true);
     ui->fieldByte1->setEnabled(true);
@@ -73,6 +75,8 @@ void RawTxWindow::changeDLC(int dlc)
     ui->fieldByte5->setEnabled(true);
     ui->fieldByte6->setEnabled(true);
     ui->fieldByte7->setEnabled(true);
+
+    uint8_t dlc =ui->comboBoxDLC->currentData().toUInt();
 
     switch(dlc)
     {
@@ -117,18 +121,74 @@ void RawTxWindow::updateCapabilities()
     //CanInterface *intf = _backend.getInterfaceById(idx);
     if(ui->comboBoxInterface->count() > 0)
     {
+        // By default BRS should be available
+
         CanInterface *intf = _backend.getInterfaceById((CanInterfaceId)ui->comboBoxInterface->currentData().toUInt());
+
         if(intf == NULL)
         {
             return;
         }
 
+        int idx_restore = ui->comboBoxDLC->currentIndex();
+
+        // If CANFD is available
         if(intf->getCapabilities() & intf->capability_canfd)
         {
-            ui->checkbox_BRS->setDisabled(0);
+            ui->comboBoxDLC->clear();
+            ui->comboBoxDLC->addItem("0", 0);
+            ui->comboBoxDLC->addItem("1", 1);
+            ui->comboBoxDLC->addItem("2", 2);
+            ui->comboBoxDLC->addItem("3", 3);
+            ui->comboBoxDLC->addItem("4", 4);
+            ui->comboBoxDLC->addItem("5", 5);
+            ui->comboBoxDLC->addItem("6", 6);
+            ui->comboBoxDLC->addItem("7", 7);
+            ui->comboBoxDLC->addItem("8", 8);
+            ui->comboBoxDLC->addItem("12", 12);
+            ui->comboBoxDLC->addItem("16", 16);
+            ui->comboBoxDLC->addItem("20", 20);
+            ui->comboBoxDLC->addItem("24", 24);
+            ui->comboBoxDLC->addItem("32", 32);
+            ui->comboBoxDLC->addItem("48", 48);
+            ui->comboBoxDLC->addItem("64", 64);
+
+            // Restore previous selected DLC if available
+            if(idx_restore > 1 && idx_restore < ui->comboBoxDLC->count())
+                ui->comboBoxDLC->setCurrentIndex(idx_restore);
+
+            ui->checkbox_FD->setDisabled(0);
+            // Enable BRS if this is an FD frame
+            if(ui->checkbox_FD->isChecked())
+            {
+                ui->checkbox_BRS->setDisabled(0);
+            }
+            else
+            {
+                ui->checkbox_BRS->setDisabled(1);
+                ui->checkbox_BRS->setCheckState(Qt::CheckState::Unchecked);
+            }
+
         }
         else
         {
+            // CANFD not available
+            ui->comboBoxDLC->clear();
+            ui->comboBoxDLC->addItem("0", 0);
+            ui->comboBoxDLC->addItem("1", 1);
+            ui->comboBoxDLC->addItem("2", 2);
+            ui->comboBoxDLC->addItem("3", 3);
+            ui->comboBoxDLC->addItem("4", 4);
+            ui->comboBoxDLC->addItem("5", 5);
+            ui->comboBoxDLC->addItem("6", 6);
+            ui->comboBoxDLC->addItem("7", 7);
+            ui->comboBoxDLC->addItem("8", 8);
+
+            // Restore previous selected DLC if available
+            if(idx_restore > 1 && idx_restore < ui->comboBoxDLC->count())
+                ui->comboBoxDLC->setCurrentIndex(idx_restore);
+
+            ui->checkbox_FD->setDisabled(1);
             ui->checkbox_BRS->setDisabled(1);
         }
     }
@@ -181,7 +241,6 @@ void RawTxWindow::refreshInterfaces()
         CanInterface *intf = _backend.getInterfaceById(ifid);
         ui->comboBoxInterface->addItem(intf->getName() + " " + intf->getDriver()->getName());
         ui->comboBoxInterface->setItemData(cb_idx, QVariant(ifid));
-        fprintf(stderr, "Refresh interface, CBXID=%d IFID=%d\r\n", cb_idx, ifid);
         cb_idx++;
     }
 
@@ -221,7 +280,13 @@ void RawTxWindow::sendRawMessage()
         ui->checkBox_IsExtended->setChecked(true);
     }
 
-    uint8_t dlc = ui->fieldDLC->text().toUpper().toInt(NULL, 16);
+    uint8_t dlc =ui->comboBoxDLC->currentData().toUInt();
+
+    // If DLC > 8, must be FD
+    if(dlc > 8)
+    {
+        ui->checkbox_FD->setChecked(true);
+    }
 
     msg.setData(data_int[0],data_int[1],data_int[2],data_int[3],data_int[4],data_int[5],data_int[6],data_int[7]);
     msg.setId(address);
@@ -231,14 +296,19 @@ void RawTxWindow::sendRawMessage()
     msg.setRTR(en_rtr);
     msg.setErrorFrame(en_errorframe);
 
+    if(ui->checkbox_BRS->isChecked())
+        msg.setBRS(true);
+    if(ui->checkbox_FD->isChecked())
+        msg.setFD(true);
+
     CanInterface *intf = _backend.getInterfaceById((CanInterfaceId)ui->comboBoxInterface->currentData().toUInt());
     intf->sendMessage(msg);
 
 
     char outmsg[256];
-    snprintf(outmsg, 256, "Send [%s] to %d on port %s [ext=%u rtr=%u err=%u]",
+    snprintf(outmsg, 256, "Send [%s] to %d on port %s [ext=%u rtr=%u err=%u fd=%u brs=%u]",
              msg.getDataHexString().toLocal8Bit().constData(), msg.getId(), intf->getName().toLocal8Bit().constData(),
-             msg.isExtended(), msg.isRTR(), msg.isErrorFrame());
+             msg.isExtended(), msg.isRTR(), msg.isErrorFrame(), msg.isFD(), msg.isBRS());
     log_info(outmsg);
 
 }

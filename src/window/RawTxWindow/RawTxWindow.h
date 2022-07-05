@@ -44,7 +44,7 @@ public:
     virtual bool loadXML(Backend &backend, QDomElement &el);
 
 private slots:
-    void changeDLC(int dlc);
+    void changeDLC();
     void updateCapabilities();
     void changeRepeatRate(int ms);
     void sendRepeatMessage(bool enable);

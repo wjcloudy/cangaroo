@@ -47,7 +47,13 @@ public:
 	bool isRTR() const;
 	void setRTR(const bool isRTR);
 
-	bool isErrorFrame() const;
+    bool isFD() const;
+    void setFD(const bool isFD);
+
+    bool isBRS() const;
+    void setBRS(const bool isFD);
+
+    bool isErrorFrame() const;
 	void setErrorFrame(const bool isErrorFrame);
 
     CanInterfaceId getInterfaceId() const;
@@ -59,9 +65,9 @@ public:
 	uint8_t getByte(const uint8_t index) const;
 	void setByte(const uint8_t index, const uint8_t value);
 
-    uint64_t getU64() const;
     uint64_t extractRawSignal(uint8_t start_bit, const uint8_t length, const bool isBigEndian) const;
 
+    void setDataAt(uint8_t position, uint8_t data);
 	void setData(const uint8_t d0);
 	void setData(const uint8_t d0, const uint8_t d1);
 	void setData(const uint8_t d0, const uint8_t d1, const uint8_t d2);
@@ -84,12 +90,14 @@ public:
 private:
 	uint32_t _raw_id;
     uint8_t _dlc;
+    bool _isFD;
+    bool _isBRS;
     CanInterfaceId _interface;
     union {
-		uint8_t _u8[8];
-		uint16_t _u16[4];
-		uint32_t _u32[2];
-		uint64_t _u64;
+        uint8_t _u8[8*8];
+        uint16_t _u16[4*8];
+        uint32_t _u32[2*8];
+        uint64_t _u64[8];
 	};
     struct timeval _timestamp;
 

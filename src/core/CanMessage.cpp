@@ -33,14 +33,15 @@ enum {
 };
 
 CanMessage::CanMessage()
-  : _raw_id(0), _dlc(0), _interface(0), _u64(0)
+  : _raw_id(0), _dlc(0), _isFD(false), _interface(0), _u8()
 {
     _timestamp.tv_sec = 0;
     _timestamp.tv_usec = 0;
+
 }
 
 CanMessage::CanMessage(uint32_t can_id)
-  : _dlc(0), _interface(0), _u64(0)
+  : _dlc(0), _interface(0), _u8()
 {
     _timestamp.tv_sec = 0;
     _timestamp.tv_usec = 0;
@@ -56,7 +57,13 @@ void CanMessage::cloneFrom(const CanMessage &msg)
 {
     _raw_id = msg._raw_id;
     _dlc = msg._dlc;
-    _u64 = msg._u64;
+
+    // Copy data
+    for(int i=0; i<64; i++)
+    {
+        _u8[i] = msg._u8[i];
+    }
+
     _interface = msg._interface;
     _timestamp = msg._timestamp;
 }
@@ -99,15 +106,31 @@ void CanMessage::setExtended(const bool isExtended) {
 }
 
 bool CanMessage::isRTR() const {
-	return (_raw_id & id_flag_rtr) != 0;
+    return (_raw_id & id_flag_rtr) != 0;
 }
 
 void CanMessage::setRTR(const bool isRTR) {
-	if (isRTR) {
-		_raw_id |= id_flag_rtr;
-	} else {
-		_raw_id &= ~id_flag_rtr;
-	}
+    if (isRTR) {
+        _raw_id |= id_flag_rtr;
+    } else {
+        _raw_id &= ~id_flag_rtr;
+    }
+}
+
+bool CanMessage::isFD() const {
+    return _isFD;
+}
+
+void CanMessage::setFD(const bool isFD) {
+    _isFD = isFD;
+}
+
+bool CanMessage::isBRS() const {
+    return _isBRS;
+}
+
+void CanMessage::setBRS(const bool isBRS) {
+    _isBRS = isBRS;
 }
 
 bool CanMessage::isErrorFrame() const {
@@ -137,7 +160,8 @@ uint8_t CanMessage::getLength() const {
 }
 
 void CanMessage::setLength(const uint8_t dlc) {
-	if (dlc<=8) {
+    // Limit to CANFD max length
+    if (dlc<=64) {
 		_dlc = dlc;
 	} else {
 		_dlc = 8;
@@ -158,18 +182,14 @@ void CanMessage::setByte(const uint8_t index, const uint8_t value) {
     }
 }
 
-uint64_t CanMessage::getU64() const
-{
-    return _u64;
-}
-
 uint64_t CanMessage::extractRawSignal(uint8_t start_bit, const uint8_t length, const bool isBigEndian) const
 {
 //    if ((start_bit+length) > (getLength()*8)) {
 //        return 0;
 //    }
 
-    uint64_t data = le64toh(_u64);
+    // FIXME: This only gives access to data bytes 0-8. Need to rework for CANFD.
+    uint64_t data = le64toh(_u64[0]);
 
     data >>= start_bit;
 
@@ -191,6 +211,14 @@ uint64_t CanMessage::extractRawSignal(uint8_t start_bit, const uint8_t length, c
     }
 
     return data;
+}
+
+void CanMessage::setDataAt(uint8_t position, uint8_t data)
+{
+    if(position<sizeof(_u8))
+        _u8[position] = data;
+    else
+        return;
 }
 
 void CanMessage::setData(const uint8_t d0) {
@@ -305,17 +333,14 @@ QString CanMessage::getIdString() const
 
 QString CanMessage::getDataHexString() const
 {
-    switch (getLength()) {
-        case 0: return "";
-        case 1: return QString().sprintf("%02X", getByte(0));
-        case 2: return QString().sprintf("%02X %02X", getByte(0), getByte(1));
-        case 3: return QString().sprintf("%02X %02X %02X", getByte(0), getByte(1), getByte(2));
-        case 4: return QString().sprintf("%02X %02X %02X %02X", getByte(0), getByte(1), getByte(2), getByte(3));
-        case 5: return QString().sprintf("%02X %02X %02X %02X %02X", getByte(0), getByte(1), getByte(2), getByte(3), getByte(4));
-        case 6: return QString().sprintf("%02X %02X %02X %02X %02X %02X", getByte(0), getByte(1), getByte(2), getByte(3), getByte(4), getByte(5));
-        case 7: return QString().sprintf("%02X %02X %02X %02X %02X %02X %02X", getByte(0), getByte(1), getByte(2), getByte(3), getByte(4), getByte(5), getByte(6));
-        case 8: return QString().sprintf("%02X %02X %02X %02X %02X %02X %02X %02X", getByte(0), getByte(1), getByte(2), getByte(3), getByte(4), getByte(5), getByte(6), getByte(7));
-        default: return QString();
+    if(getLength() == 0)
+        return "";
+
+    QString outstr = "";
+    for(int i=0; i<getLength(); i++)
+    {
+        outstr += QString().sprintf("%02X ", getByte(i));
     }
 
+    return outstr;
 }
