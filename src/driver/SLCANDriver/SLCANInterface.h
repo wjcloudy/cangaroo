@@ -63,6 +63,7 @@ public:
     SLCANInterface(SLCANDriver *driver, int index, QString name, bool fd_support);
     virtual ~SLCANInterface();
 
+    QString getDetailsStr() const;
     virtual QString getName() const;
     void setName(QString name);
 

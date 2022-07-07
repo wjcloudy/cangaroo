@@ -56,6 +56,17 @@ SLCANInterface::SLCANInterface(SLCANDriver *driver, int index, QString name, boo
 SLCANInterface::~SLCANInterface() {
 }
 
+QString SLCANInterface::getDetailsStr() const {
+    if(_config.supports_canfd)
+    {
+        return "CANable with CANFD support";
+    }
+    else
+    {
+        return "CANable with standard CAN support";
+    }
+}
+
 QString SLCANInterface::getName() const {
 	return _name;
 }

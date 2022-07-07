@@ -56,10 +56,20 @@ bool SLCANDriver::update() {
         fprintf(stderr, "   Description : %s \r\n", info.description().toStdString().c_str());
         fprintf(stderr, "   Manufacturer: %s \r\n", info.manufacturer().toStdString().c_str());
 
-        if(info.description().contains("CANable") || info.vendorIdentifier() == 0xad50)
+        if(info.vendorIdentifier() == 0xad50 && info.productIdentifier() == 0x60C4)
         {
 
-            perror("   !! This is a CANable device!");
+            perror("   ++ CANable 1.0 or similar ST USB CDC device detected");
+
+            // Create new slcan interface without FD support
+            SLCANInterface *intf = createOrUpdateInterface(interface_cnt, info.portName(), false);
+            interface_cnt++;
+        }
+        else if(info.vendorIdentifier() == 0x16D0 && info.productIdentifier() == 0x117E)
+        {
+            perror("   ++ CANable 2.0 detected");
+
+            // Create new slcan interface without FD support
             SLCANInterface *intf = createOrUpdateInterface(interface_cnt, info.portName(), true);
             interface_cnt++;
         }

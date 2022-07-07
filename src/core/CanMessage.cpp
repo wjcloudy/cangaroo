@@ -215,7 +215,7 @@ uint64_t CanMessage::extractRawSignal(uint8_t start_bit, const uint8_t length, c
 
 void CanMessage::setDataAt(uint8_t position, uint8_t data)
 {
-    if(position<sizeof(_u8))
+    if(position < 64)
         _u8[position] = data;
     else
         return;

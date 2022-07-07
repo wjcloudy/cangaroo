@@ -57,4 +57,5 @@ private:
     Ui::RawTxWindow *ui;
     Backend &_backend;
     QTimer *repeatmsg_timer;
+
 };
