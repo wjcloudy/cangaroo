@@ -32,7 +32,7 @@
 #define SLCAN_STD_ID_LEN 3
 #define SLCAN_EXT_ID_LEN 8
 
-#define RXCIRBUF_LEN (SLCAN_MTU * 2)
+#define RXCIRBUF_LEN 8192 // Buffer for received serial data, serviced at 1ms intervals
 
 class SLCANDriver;
 

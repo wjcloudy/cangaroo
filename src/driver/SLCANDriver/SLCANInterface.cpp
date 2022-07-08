@@ -34,7 +34,7 @@
 #include <QProcess>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
-
+#include <QThread>
 
 SLCANInterface::SLCANInterface(SLCANDriver *driver, int index, QString name, bool fd_support)
   : CanInterface((CanDriver *)driver),
@@ -229,6 +229,7 @@ void SLCANInterface::open()
         //perror("Serport connected!");
     } else {
         perror("Serport connect failed!");
+        _serport_mutex.unlock();
         return;
     }
     _serport->flush();
@@ -238,10 +239,9 @@ void SLCANInterface::open()
     {
         // This is called when readyRead() is emitted
         QByteArray datas = _serport->readAll();
+        _rxbuf_mutex.lock();
         for(int i=0; i<datas.count(); i++)
         {
-            _rxbuf_mutex.lock();
-
             // If incrementing the head will hit the tail, we've filled the buffer. Reset and discard all data.
             if(((_rxbuf_head + 1) % RXCIRBUF_LEN) == _rxbuf_tail)
             {
@@ -254,8 +254,9 @@ void SLCANInterface::open()
                 _rxbuf[_rxbuf_head] = datas.at(i);
                 _rxbuf_head = (_rxbuf_head + 1) % RXCIRBUF_LEN; // Wrap at MTU
             }
-            _rxbuf_mutex.unlock();
         }
+        _rxbuf_mutex.unlock();
+
     });
 
 
@@ -477,6 +478,8 @@ void SLCANInterface::sendMessage(const CanMessage &msg) {
 
 bool SLCANInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
 {
+    // Don't saturate the thread. Read the buffer every 1ms.
+    QThread().msleep(1);
 
     bool ret = false;
     _rxbuf_mutex.lock();
@@ -504,6 +507,7 @@ bool SLCANInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
         _rxbuf_tail = (_rxbuf_tail + 1) % RXCIRBUF_LEN;
     }
     _rxbuf_mutex.unlock();
+
     return ret;
 }
 
