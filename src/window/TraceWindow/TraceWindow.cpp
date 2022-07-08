@@ -47,9 +47,9 @@ TraceWindow::TraceWindow(QWidget *parent, Backend &backend) :
 
     _aggFilteredModel = new TraceFilterModel(this);
     _aggFilteredModel->setSourceModel(_aggregatedProxyModel);
-
     _linFilteredModel = new TraceFilterModel(this);
     _linFilteredModel->setSourceModel(_linearProxyModel);
+
 
 
     setMode(mode_aggregated);
@@ -58,6 +58,7 @@ TraceWindow::TraceWindow(QWidget *parent, Backend &backend) :
     QFont font("Monospace");
     font.setStyleHint(QFont::TypeWriter);
     ui->tree->setFont(font);
+    ui->tree->setAlternatingRowColors(true);
 
     ui->tree->setUniformRowHeights(true);
     ui->tree->setColumnWidth(0, 120);
@@ -211,5 +212,6 @@ void TraceWindow::on_cbFilterChanged()
 {
     _aggFilteredModel->setFilterText(ui->filterLineEdit->text());
     _linFilteredModel->setFilterText(ui->filterLineEdit->text());
-    //_filteredModel->setFilterRegExp();
+    _aggFilteredModel->invalidate();
+    _linFilteredModel->invalidate();
 }
