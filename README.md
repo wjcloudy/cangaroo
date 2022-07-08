@@ -1,9 +1,18 @@
 # cangaroo
 open source can bus analyzer
 
+* Supports CANable / CANable 2 SLCAN interfaces on Windows and Linux
+* Supports Candlelight interfaces on Windows
+* Supports Socketcan interfaces on Linux
+* Initial support for transmit / receive of CANFD packets
+
+
 written by Hubert Denkmair <hubert@denkmair.de>
 
-## building on linux
+further development by Ethan Zonca <e@ethanzonca.com>
+
+
+## Building on Linux
 * to install all required packages in a vanilla ubuntu 16.04:
   * sudo apt-get install build-essential git qt5-qmake qtbase5-dev libnl-3-dev libnl-route-3-dev
 * build with:
@@ -11,7 +20,7 @@ written by Hubert Denkmair <hubert@denkmair.de>
   * make
   * make install
 
-## building on windows
+## Building on Windows
 * Qt Creator (Community Version is okay) brings everything you need
 * except for the PCAN libraries. 
   * Get them from http://www.peak-system.com/fileadmin/media/files/pcan-basic.zip
@@ -24,9 +33,14 @@ written by Hubert Denkmair <hubert@denkmair.de>
 * if you want to deploy the cangaroo app, make sure to also include the needed Qt Libraries.
   for a normal release build, these are: Qt5Core.dll Qt5Gui.dll Qt5Widgets.dll Qt5Xml.dll
 
-## changelog
+## Changelog
 
-### v0.2.1 unreleased
+### v0.2.4 unreleased
+* Add support for SLCAN interfaces (CANable, CANable 2) including FD
+* Add initial support for CANFD
+* Add filtering of CAN messages
+
+### v0.2.1
 * make logging easier
 * refactorings
 * scroll trace view per pixel, not per item (always show last message when autoscroll is on)
@@ -63,10 +77,9 @@ initial release \o/
 
 
 
-## todo
+## TODO
 
 ### backend
-* allow for canfd frames
 * support non-message frames in traces (e.g. markers)
 * implement plugin API
 * embed python for scripting
@@ -92,14 +105,10 @@ initial release \o/
 * display #warnings, #passive, #busoff, #restarts of socketcan devices
 
 ### trace window
-* message filtering
 * assign colors to can interfaces / messages
 * limit displayed number of messages
 * show error frames and other non-message frames
 * sort signals by startbit, name or position in candb
-
-### raw message generator
-* provide a simple way to generate raw can messages
 
 ### CanDB based generator
 * generate can messages from candbs

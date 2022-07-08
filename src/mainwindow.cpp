@@ -436,8 +436,8 @@ void MainWindow::showAboutDialog()
        "\n"
        "version 0.2.3\n"
        "\n"
-       "(c)2015-2017 Hubert Denkmair"
-       "(c)2018 Ethan Zonca"
+       "(c)2015-2017 Hubert Denkmair\n"
+       "(c)2018-2022 Ethan Zonca"
     );
 }
 
