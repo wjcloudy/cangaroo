@@ -26,6 +26,7 @@
 #include <QSortFilterProxyModel>
 #include "LinearTraceViewModel.h"
 #include "AggregatedTraceViewModel.h"
+#include "TraceFilterModel.h"
 
 TraceWindow::TraceWindow(QWidget *parent, Backend &backend) :
     ConfigurableWidget(parent),
@@ -43,6 +44,13 @@ TraceWindow::TraceWindow(QWidget *parent, Backend &backend) :
     _aggregatedProxyModel = new QSortFilterProxyModel(this);
     _aggregatedProxyModel->setSourceModel(_aggregatedTraceViewModel);
     _aggregatedProxyModel->setDynamicSortFilter(true);
+
+    _aggFilteredModel = new TraceFilterModel(this);
+    _aggFilteredModel->setSourceModel(_aggregatedProxyModel);
+
+    _linFilteredModel = new TraceFilterModel(this);
+    _linFilteredModel->setSourceModel(_linearProxyModel);
+
 
     setMode(mode_aggregated);
     setAutoScroll(false);
@@ -69,6 +77,7 @@ TraceWindow::TraceWindow(QWidget *parent, Backend &backend) :
 
     connect(_linearTraceViewModel, SIGNAL(rowsInserted(QModelIndex,int,int)), this, SLOT(rowsInserted(QModelIndex,int,int)));
 
+    connect(ui->filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(on_cbFilterChanged()));
 }
 
 TraceWindow::~TraceWindow()
@@ -85,11 +94,11 @@ void TraceWindow::setMode(TraceWindow::mode_t mode)
 
     if (_mode==mode_linear) {
         ui->tree->setSortingEnabled(false);
-        ui->tree->setModel(_linearTraceViewModel);
+        ui->tree->setModel(_linFilteredModel); //_linearTraceViewModel);
         ui->cbAutoScroll->setEnabled(true);
     } else {
         ui->tree->setSortingEnabled(true);
-        ui->tree->setModel(_aggregatedProxyModel);
+        ui->tree->setModel(_aggFilteredModel); //_aggregatedProxyModel);
         ui->cbAutoScroll->setEnabled(false);
     }
 
@@ -196,4 +205,11 @@ void TraceWindow::on_cbAutoScroll_stateChanged(int i)
 void TraceWindow::on_cbTimestampMode_currentIndexChanged(int index)
 {
     setTimestampMode((timestamp_mode_t)ui->cbTimestampMode->itemData(index).toInt());
+}
+
+void TraceWindow::on_cbFilterChanged()
+{
+    _aggFilteredModel->setFilterText(ui->filterLineEdit->text());
+    _linFilteredModel->setFilterText(ui->filterLineEdit->text());
+    //_filteredModel->setFilterRegExp();
 }
