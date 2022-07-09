@@ -40,6 +40,7 @@ SLCANInterface::SLCANInterface(SLCANDriver *driver, int index, QString name, boo
   : CanInterface((CanDriver *)driver),
 	_idx(index),
     _name(name),
+    _isOpen(false),
     _ts_mode(ts_mode_SIOCSHWTSTAMP),
     _serport(new QSerialPort()),
     _rxbuf_head(0),
@@ -230,6 +231,7 @@ void SLCANInterface::open()
     } else {
         perror("Serport connect failed!");
         _serport_mutex.unlock();
+        _isOpen = false;
         return;
     }
     _serport->flush();
@@ -330,6 +332,8 @@ void SLCANInterface::open()
     _serport->write("O\r", 2);
     _serport->flush();
 
+    _isOpen = true;
+
     // Release port mutex
     _serport_mutex.unlock();
 }
@@ -349,7 +353,13 @@ void SLCANInterface::close()
         _serport->close();
     }
 
+    _isOpen = false;
     _serport_mutex.unlock();
+}
+
+bool SLCANInterface::isOpen()
+{
+    return _isOpen;
 }
 
 void SLCANInterface::sendMessage(const CanMessage &msg) {

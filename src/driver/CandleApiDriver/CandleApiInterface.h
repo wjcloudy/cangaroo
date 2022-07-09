@@ -29,6 +29,7 @@ public:
     virtual QList<CanTiming> getAvailableBitrates();
 
     virtual void open();
+    virtual bool isOpen();
     virtual void close();
 
     virtual void sendMessage(const CanMessage &msg);
@@ -51,6 +52,7 @@ private:
 
     uint64_t _hostOffsetStart;
     uint32_t _deviceTicksStart;
+    bool _isOpen;
 
     candle_handle _handle;
     MeasurementInterface _settings;

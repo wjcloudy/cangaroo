@@ -224,11 +224,13 @@ void CandleApiInterface::open()
 {
     if (!candle_dev_open(_handle)) {
         // TODO what?
+        _isOpen = false;
         return;
     }
 
     if (!setBitTiming(_settings.bitrate(), _settings.samplePoint())) {
         // TODO what?
+        _isOpen = false;
         return;
     }
 
@@ -256,12 +258,19 @@ void CandleApiInterface::open()
     }
 
     candle_channel_start(_handle, 0, flags);
+    _isOpen = true;
+}
+
+bool CandleApiInterface::isOpen()
+{
+    return _isOpen;
 }
 
 void CandleApiInterface::close()
 {
     candle_channel_stop(_handle, 0);
     candle_dev_close(_handle);
+    _isOpen = false;
 }
 
 void CandleApiInterface::sendMessage(const CanMessage &msg)

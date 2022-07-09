@@ -67,6 +67,11 @@ void CanInterface::open() {
 void CanInterface::close() {
 }
 
+bool CanInterface::isOpen()
+{
+    return false;
+}
+
 bool CanInterface::updateStatistics()
 {
     return false;

@@ -48,6 +48,7 @@
 SocketCanInterface::SocketCanInterface(SocketCanDriver *driver, int index, QString name)
   : CanInterface((CanDriver *)driver),
 	_idx(index),
+    _isOpen(false),
 	_fd(0),
     _name(name),
     _ts_mode(ts_mode_SIOCSHWTSTAMP)
@@ -350,6 +351,7 @@ const char *SocketCanInterface::cname()
 void SocketCanInterface::open() {
 	if((_fd = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
 		perror("Error while opening socket");
+        _isOpen = false;
 	}
 
 	struct ifreq ifr;
@@ -362,11 +364,15 @@ void SocketCanInterface::open() {
 
 	if(bind(_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		perror("Error in socket bind");
+        _isOpen = false;
 	}
+
+    _isOpen = true;
 }
 
 void SocketCanInterface::close() {
 	::close(_fd);
+    _isOpen = false;
 }
 
 void SocketCanInterface::sendMessage(const CanMessage &msg) {

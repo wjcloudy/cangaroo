@@ -82,7 +82,8 @@ public:
 
 
 	virtual void open();
-	virtual void close();
+    virtual void close();
+    virtual bool isOpen();
 
     virtual void sendMessage(const CanMessage &msg);
     virtual bool readMessage(CanMessage &msg, unsigned int timeout_ms);
@@ -108,6 +109,7 @@ private:
     } ts_mode_t;
 
     int _idx;
+    bool _isOpen;
     QSerialPort* _serport;
     QMutex _serport_mutex;
     QString _name;

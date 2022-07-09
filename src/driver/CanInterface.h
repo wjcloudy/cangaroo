@@ -66,6 +66,8 @@ public:
 	virtual void open();
 	virtual void close();
 
+    virtual bool isOpen();
+
     virtual void sendMessage(const CanMessage &msg) = 0;
     virtual bool readMessage(CanMessage &msg, unsigned int timeout_ms) = 0;
 

@@ -42,7 +42,7 @@ RawTxWindow::RawTxWindow(QWidget *parent, Backend &backend) :
     connect(ui->comboBoxInterface, SIGNAL(currentIndexChanged(int)), this, SLOT(updateCapabilities()));
     connect(ui->checkbox_FD, SIGNAL(stateChanged(int)), this, SLOT(updateCapabilities()));
 
-    connect(&backend, SIGNAL(onSetupChanged()),  this, SLOT(refreshInterfaces()));
+    connect(&backend, SIGNAL(beginMeasurement()),  this, SLOT(refreshInterfaces()));
 
     // Timer for repeating messages
     repeatmsg_timer = new QTimer(this);
@@ -63,16 +63,6 @@ RawTxWindow::~RawTxWindow()
 {
     delete ui;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 void RawTxWindow::changeDLC()
@@ -315,7 +305,7 @@ void RawTxWindow::updateCapabilities()
                 ui->checkbox_BRS->setDisabled(1);
                 ui->checkbox_BRS->setCheckState(Qt::CheckState::Unchecked);
             }
-
+            showFDFields();
         }
         else
         {
@@ -337,6 +327,9 @@ void RawTxWindow::updateCapabilities()
 
             ui->checkbox_FD->setDisabled(1);
             ui->checkbox_BRS->setDisabled(1);
+
+            hideFDFields();
+
         }
     }
 }
@@ -386,9 +379,13 @@ void RawTxWindow::refreshInterfaces()
     // TODO: Only show interfaces that are included in active MeasurementInterfaces!
     foreach (CanInterfaceId ifid, _backend.getInterfaceList()) {
         CanInterface *intf = _backend.getInterfaceById(ifid);
-        ui->comboBoxInterface->addItem(intf->getName() + " " + intf->getDriver()->getName());
-        ui->comboBoxInterface->setItemData(cb_idx, QVariant(ifid));
-        cb_idx++;
+
+        if(intf->isOpen())
+        {
+            ui->comboBoxInterface->addItem(intf->getName() + " " + intf->getDriver()->getName());
+            ui->comboBoxInterface->setItemData(cb_idx, QVariant(ifid));
+            cb_idx++;
+        }
     }
 
     if(cb_idx == 0)
@@ -544,4 +541,173 @@ bool RawTxWindow::loadXML(Backend &backend, QDomElement &el)
     return true;
 }
 
+void RawTxWindow::hideFDFields()
+{
+
+    ui->label_col21->hide();
+    ui->label_col22->hide();
+    ui->label_col23->hide();
+    ui->label_col24->hide();
+    ui->label_col25->hide();
+    ui->label_col26->hide();
+    ui->label_col27->hide();
+    ui->label_col28->hide();
+
+    ui->label_pay2->hide();
+    ui->label_pay3->hide();
+    ui->label_pay4->hide();
+    ui->label_pay5->hide();
+    ui->label_pay6->hide();
+    ui->label_pay7->hide();
+    ui->label_pay8->hide();
+
+    ui->fieldByte0_1->hide();
+    ui->fieldByte1_1->hide();
+    ui->fieldByte2_1->hide();
+    ui->fieldByte3_1->hide();
+    ui->fieldByte4_1->hide();
+    ui->fieldByte5_1->hide();
+    ui->fieldByte6_1->hide();
+    ui->fieldByte7_1->hide();
+
+    ui->fieldByte0_2->hide();
+    ui->fieldByte1_2->hide();
+    ui->fieldByte2_2->hide();
+    ui->fieldByte3_2->hide();
+    ui->fieldByte4_2->hide();
+    ui->fieldByte5_2->hide();
+    ui->fieldByte6_2->hide();
+    ui->fieldByte7_2->hide();
+
+    ui->fieldByte0_3->hide();
+    ui->fieldByte1_3->hide();
+    ui->fieldByte2_3->hide();
+    ui->fieldByte3_3->hide();
+    ui->fieldByte4_3->hide();
+    ui->fieldByte5_3->hide();
+    ui->fieldByte6_3->hide();
+    ui->fieldByte7_3->hide();
+
+    ui->fieldByte0_4->hide();
+    ui->fieldByte1_4->hide();
+    ui->fieldByte2_4->hide();
+    ui->fieldByte3_4->hide();
+    ui->fieldByte4_4->hide();
+    ui->fieldByte5_4->hide();
+    ui->fieldByte6_4->hide();
+    ui->fieldByte7_4->hide();
+
+    ui->fieldByte0_5->hide();
+    ui->fieldByte1_5->hide();
+    ui->fieldByte2_5->hide();
+    ui->fieldByte3_5->hide();
+    ui->fieldByte4_5->hide();
+    ui->fieldByte5_5->hide();
+    ui->fieldByte6_5->hide();
+    ui->fieldByte7_5->hide();
+
+    ui->fieldByte0_6->hide();
+    ui->fieldByte1_6->hide();
+    ui->fieldByte2_6->hide();
+    ui->fieldByte3_6->hide();
+    ui->fieldByte4_6->hide();
+    ui->fieldByte5_6->hide();
+    ui->fieldByte6_6->hide();
+    ui->fieldByte7_6->hide();
+
+    ui->fieldByte0_7->hide();
+    ui->fieldByte1_7->hide();
+    ui->fieldByte2_7->hide();
+    ui->fieldByte3_7->hide();
+    ui->fieldByte4_7->hide();
+    ui->fieldByte5_7->hide();
+    ui->fieldByte6_7->hide();
+    ui->fieldByte7_7->hide();
+}
+
+
+void RawTxWindow::showFDFields()
+{
+
+    ui->label_col21->show();
+    ui->label_col22->show();
+    ui->label_col23->show();
+    ui->label_col24->show();
+    ui->label_col25->show();
+    ui->label_col26->show();
+    ui->label_col27->show();
+    ui->label_col28->show();
+
+    ui->label_pay2->show();
+    ui->label_pay3->show();
+    ui->label_pay4->show();
+    ui->label_pay5->show();
+    ui->label_pay6->show();
+    ui->label_pay7->show();
+    ui->label_pay8->show();
+
+
+    ui->fieldByte0_1->show();
+    ui->fieldByte1_1->show();
+    ui->fieldByte2_1->show();
+    ui->fieldByte3_1->show();
+    ui->fieldByte4_1->show();
+    ui->fieldByte5_1->show();
+    ui->fieldByte6_1->show();
+    ui->fieldByte7_1->show();
+
+    ui->fieldByte0_2->show();
+    ui->fieldByte1_2->show();
+    ui->fieldByte2_2->show();
+    ui->fieldByte3_2->show();
+    ui->fieldByte4_2->show();
+    ui->fieldByte5_2->show();
+    ui->fieldByte6_2->show();
+    ui->fieldByte7_2->show();
+
+    ui->fieldByte0_3->show();
+    ui->fieldByte1_3->show();
+    ui->fieldByte2_3->show();
+    ui->fieldByte3_3->show();
+    ui->fieldByte4_3->show();
+    ui->fieldByte5_3->show();
+    ui->fieldByte6_3->show();
+    ui->fieldByte7_3->show();
+
+    ui->fieldByte0_4->show();
+    ui->fieldByte1_4->show();
+    ui->fieldByte2_4->show();
+    ui->fieldByte3_4->show();
+    ui->fieldByte4_4->show();
+    ui->fieldByte5_4->show();
+    ui->fieldByte6_4->show();
+    ui->fieldByte7_4->show();
+
+    ui->fieldByte0_5->show();
+    ui->fieldByte1_5->show();
+    ui->fieldByte2_5->show();
+    ui->fieldByte3_5->show();
+    ui->fieldByte4_5->show();
+    ui->fieldByte5_5->show();
+    ui->fieldByte6_5->show();
+    ui->fieldByte7_5->show();
+
+    ui->fieldByte0_6->show();
+    ui->fieldByte1_6->show();
+    ui->fieldByte2_6->show();
+    ui->fieldByte3_6->show();
+    ui->fieldByte4_6->show();
+    ui->fieldByte5_6->show();
+    ui->fieldByte6_6->show();
+    ui->fieldByte7_6->show();
+
+    ui->fieldByte0_7->show();
+    ui->fieldByte1_7->show();
+    ui->fieldByte2_7->show();
+    ui->fieldByte3_7->show();
+    ui->fieldByte4_7->show();
+    ui->fieldByte5_7->show();
+    ui->fieldByte6_7->show();
+    ui->fieldByte7_7->show();
+}
 

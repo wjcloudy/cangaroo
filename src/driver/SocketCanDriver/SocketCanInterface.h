@@ -72,6 +72,7 @@ public:
 
 
 	virtual void open();
+    virtual bool isOpen();
 	virtual void close();
 
     virtual void sendMessage(const CanMessage &msg);
@@ -98,6 +99,7 @@ private:
     } ts_mode_t;
 
     int _idx;
+    bool _isOpen;
 	int _fd;
     QString _name;
 
