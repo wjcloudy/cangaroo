@@ -295,15 +295,26 @@ void RawTxWindow::updateCapabilities()
                 ui->comboBoxDLC->setCurrentIndex(idx_restore);
 
             ui->checkbox_FD->setDisabled(0);
+
             // Enable BRS if this is an FD frame
             if(ui->checkbox_FD->isChecked())
             {
+                // Enable BRS if FD enabled
                 ui->checkbox_BRS->setDisabled(0);
+
+                // Disable RTR if FD enabled
+                ui->checkBox_IsRTR->setDisabled(1);
+                ui->checkBox_IsRTR->setChecked(false);
             }
             else
             {
+                // Disable BRS if FD disabled
                 ui->checkbox_BRS->setDisabled(1);
-                ui->checkbox_BRS->setCheckState(Qt::CheckState::Unchecked);
+                ui->checkbox_BRS->setChecked(false);
+
+                // Enable RTR if FD disabled
+                ui->checkBox_IsRTR->setDisabled(0);
+
             }
             showFDFields();
         }
@@ -325,8 +336,14 @@ void RawTxWindow::updateCapabilities()
             if(idx_restore > 1 && idx_restore < ui->comboBoxDLC->count())
                 ui->comboBoxDLC->setCurrentIndex(idx_restore);
 
+            // Unset/disable FD / BRS checkboxes
             ui->checkbox_FD->setDisabled(1);
             ui->checkbox_BRS->setDisabled(1);
+            ui->checkbox_FD->setChecked(false);
+            ui->checkbox_BRS->setChecked(false);
+
+            // Enable RTR (could be disabled by FD checkbox being set)
+            ui->checkBox_IsRTR->setDisabled(0);
 
             hideFDFields();
 
