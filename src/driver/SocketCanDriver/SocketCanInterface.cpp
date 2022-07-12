@@ -370,6 +370,11 @@ void SocketCanInterface::open() {
     _isOpen = true;
 }
 
+bool SocketCanInterface::isOpen()
+{
+    return _isOpen;
+}
+
 void SocketCanInterface::close() {
 	::close(_fd);
     _isOpen = false;
