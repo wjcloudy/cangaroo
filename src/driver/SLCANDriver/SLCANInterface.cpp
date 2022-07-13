@@ -460,7 +460,7 @@ void SLCANInterface::sendMessage(const CanMessage &msg) {
     buf[msg_idx++] = bytes;
 
     // Add data bytes
-    for (uint8_t j = 0; j < bytes; j++)
+    for (uint8_t j = 0; j < msg.getLength(); j++)
     {
         buf[msg_idx++] = (msg.getByte(j) >> 4);
         buf[msg_idx++] = (msg.getByte(j) & 0x0F);
