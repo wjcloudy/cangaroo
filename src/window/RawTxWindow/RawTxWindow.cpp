@@ -497,14 +497,20 @@ void RawTxWindow::sendRawMessage()
     data_int[data_ctr++] = ui->fieldByte7_7->text().toUpper().toInt(NULL, 16);
 
 
-
-    uint32_t address = ui->fieldAddress->text().toUpper().toInt(NULL, 16);
+    uint32_t address = ui->fieldAddress->text().toUpper().toUInt(NULL, 16);
 
     // If address is beyond std address namespace, force extended
     if(address > 0x7ff)
     {
         en_extended = true;
         ui->checkBox_IsExtended->setChecked(true);
+    }
+
+    // If address is larger than max for extended, clip
+    if(address >= 0x1FFFFFFF)
+    {
+        address = address & 0x1FFFFFFF;
+        ui->fieldAddress->setText(QString::number( address, 16 ).toUpper());
     }
 
     uint8_t dlc =ui->comboBoxDLC->currentData().toUInt();
