@@ -1,6 +1,6 @@
 /*
 
-  Copyright (c) 2015, 2016 Hubert Denkmair
+  Copyright (c) 2022 Ethan Zonca
 
   This file is part of cangaroo.
 

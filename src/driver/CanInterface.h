@@ -25,11 +25,12 @@
 #include <stdint.h>
 #include "CanDriver.h"
 #include "CanTiming.h"
+#include <QObject>
 
 class CanMessage;
 class MeasurementInterface;
 
-class CanInterface {
+class CanInterface: public QObject  {
 public:
     enum {
         state_ok,
