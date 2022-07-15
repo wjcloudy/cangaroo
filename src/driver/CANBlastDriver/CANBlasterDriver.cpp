@@ -33,9 +33,11 @@
 
 #include <QCoreApplication>
 #include <QDebug>
-#include <QtSerialPort/QSerialPort>
-#include <QtSerialPort/QSerialPortInfo>
-
+#include <QtNetwork/QUdpSocket>
+#include <QNetworkDatagram>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QList>
 
 CANBlasterDriver::CANBlasterDriver(Backend &backend)
   : CanDriver(backend),
@@ -50,10 +52,65 @@ CANBlasterDriver::~CANBlasterDriver() {
 bool CANBlasterDriver::update() {
 
     // TODO: Listen for multicast packets for discovery of canblaster servers
+    QUdpSocket udpSocket;
+    QHostAddress groupAddress;
+    groupAddress.setAddress("239.255.43.21");
+    udpSocket.bind(QHostAddress::AnyIPv4, 20000, QUdpSocket::ShareAddress);
+    udpSocket.joinMulticastGroup(groupAddress);
 
-    // Testing
+    // Record start time
+    struct timeval start_time;
+    gettimeofday(&start_time,NULL);
+
+    fprintf(stderr, "CANblaster: start listen\r\n");
+
+    QList<QString> detected_servers;
+
+    while(1)
+    {
+        while (udpSocket.hasPendingDatagrams())
+        {
+            QNetworkDatagram res = udpSocket.receiveDatagram(1024);
+            if(res.isValid())
+            {
+                QByteArray asd = res.data();
+                qDebug() << asd;
+                QJsonDocument document = QJsonDocument::fromJson(res.data());
+                QJsonObject rootObj = document.object();
+
+
+                if(rootObj.length() == 2 &&
+                   rootObj["protocol"].toString() == "CANblaster" &&
+                   rootObj["version"].toInt() == 1)
+                {
+                    if(!detected_servers.contains(res.senderAddress().toString()))
+                        detected_servers.append(res.senderAddress().toString());
+                }
+                else
+                {
+                    fprintf(stderr, "Invalid CANblaster server. Protocol: %s  Version: %d \r\n", rootObj.length(), rootObj["protocol"].toString().toStdString().c_str(), rootObj["version"].toInt());
+                }
+            }
+        }
+
+        struct timeval tv;
+        gettimeofday(&tv,NULL);
+
+        // Iterate until timer expires
+        if(tv.tv_sec - start_time.tv_sec > 1)
+            break;
+    }
+    fprintf(stderr, "CANblaster: stop listen\r\n");
+
+    fprintf(stderr, "Found %d servers: \r\n", detected_servers.length());
     int interface_cnt = 0;
-    CANBlasterInterface *intf = createOrUpdateInterface(interface_cnt++, "Test CANblaster", false);
+
+    for(QString server: detected_servers)
+    {
+        fprintf(stderr, "  - %s\r\n", server.toStdString().c_str());
+        CANBlasterInterface *intf = createOrUpdateInterface(interface_cnt++, server, false);
+    }
+
 
     return true;
 }

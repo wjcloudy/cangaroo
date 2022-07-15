@@ -79,7 +79,6 @@ public:
 
     virtual void sendMessage(const CanMessage &msg);
     virtual bool readMessage(CanMessage &msg, unsigned int timeout_ms);
-    virtual void udpRead();
     void udpHeartbeat();
 
     virtual bool updateStatistics();

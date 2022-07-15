@@ -217,7 +217,9 @@ const char *CANBlasterInterface::cname()
 void CANBlasterInterface::open()
 {
     _socket = new QUdpSocket(this);
-    if(_socket->bind(QHostAddress::LocalHost, 20001))
+
+    //if(_socket->bind(QHostAddress::LocalHost, 20001))
+    if(_socket->bind(QHostAddress(getName()), 20001))
     {
         _heartbeat_timer->start(500);
         _isOpen = true;
@@ -245,31 +247,6 @@ bool CANBlasterInterface::isOpen()
 
 void CANBlasterInterface::sendMessage(const CanMessage &msg) {
 
-
-}
-
-void CANBlasterInterface::udpRead()
-{
-    // when data comes in
-    QByteArray buffer;
-    buffer.resize(_socket->pendingDatagramSize());
-
-    QHostAddress sender;
-    quint16 senderPort;
-
-    // qint64 QUdpSocket::readDatagram(char * data, qint64 maxSize,
-    //                 QHostAddress * address = 0, quint16 * port = 0)
-    // Receives a datagram no larger than maxSize bytes and stores it in data.
-    // The sender's host address and port is stored in *address and *port
-    // (unless the pointers are 0).
-
-    _socket->readDatagram(buffer.data(), buffer.size(),
-                   &sender, &senderPort);
-
-    qDebug() << "Message from: " << sender.toString();
-    qDebug() << "Message port: " << senderPort;
-    qDebug() << "Message: " << buffer;
-    fprintf(stderr, "Got some data\r\n");
 
 }
 
