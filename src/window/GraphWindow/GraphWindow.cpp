@@ -51,6 +51,26 @@ GraphWindow::GraphWindow(QWidget *parent, Backend &backend) :
     data_chart->setTitle("Simple line chart example");
 
 
+    // Have a box pop up that allows the user to select a signal from the loaded DBC to graph
+    // On OK, add that CanDbMessage to a list.
+    // Either sample the values regularly with a timer or somehow emit a signal when the message
+    // is received that we catch here...
+
+    //backend.findDbMessage()
+
+//    CanDbMessage *result = 0;
+
+//    foreach (MeasurementNetwork *network, _networks) {
+//        foreach (pCanDb db, network->_canDbs) {
+//            result = db->getMessageById(msg.getRawId());
+//            if (result != 0) {
+//                return result;
+//            }
+//        }
+//    }
+//    return result;
+
+
 
     ui->chartView->setChart(data_chart);
     ui->chartView->setRenderHint(QPainter::Antialiasing);

@@ -19,7 +19,7 @@
 
 */
 
-#include "CANBlastInterface.h"
+#include "CANBlasterInterface.h"
 
 #include <core/Backend.h>
 #include <core/MeasurementInterface.h>
@@ -35,10 +35,9 @@
 #include <QThread>
 #include <QTimer>
 #include <QNetworkDatagram>
-#include <linux/can.h>
 
 
-CANBlastInterface::CANBlastInterface(CANBlastDriver *driver, int index, QString name, bool fd_support)
+CANBlasterInterface::CANBlasterInterface(CANBlasterDriver *driver, int index, QString name, bool fd_support)
   : CanInterface((CanDriver *)driver),
 	_idx(index),
     _isOpen(false),
@@ -53,33 +52,33 @@ CANBlastInterface::CANBlastInterface(CANBlastDriver *driver, int index, QString 
     _config.supports_canfd = fd_support;
 
     _heartbeat_timer = new QTimer(this);
-    connect(_heartbeat_timer, &QTimer::timeout, this, &CANBlastInterface::udpHeartbeat);
+    connect(_heartbeat_timer, &QTimer::timeout, this, &CANBlasterInterface::udpHeartbeat);
 
 }
 
-CANBlastInterface::~CANBlastInterface() {
+CANBlasterInterface::~CANBlasterInterface() {
 }
 
-QString CANBlastInterface::getDetailsStr() const {
+QString CANBlasterInterface::getDetailsStr() const {
     if(_config.supports_canfd)
     {
-        return "CANBlast with CANFD support";
+        return "CANBlaster client with CANFD support";
     }
     else
     {
-        return "CANBlast with standard CAN support";
+        return "CANBlaster client with standard CAN support";
     }
 }
 
-QString CANBlastInterface::getName() const {
+QString CANBlasterInterface::getName() const {
 	return _name;
 }
 
-void CANBlastInterface::setName(QString name) {
+void CANBlasterInterface::setName(QString name) {
     _name = name;
 }
 
-QList<CanTiming> CANBlastInterface::getAvailableBitrates()
+QList<CanTiming> CANBlasterInterface::getAvailableBitrates()
 {
     QList<CanTiming> retval;
     QList<unsigned> bitrates({10000, 20000, 50000, 83333, 100000, 125000, 250000, 500000, 800000, 1000000});
@@ -100,47 +99,47 @@ QList<CanTiming> CANBlastInterface::getAvailableBitrates()
 }
 
 
-void CANBlastInterface::applyConfig(const MeasurementInterface &mi)
+void CANBlasterInterface::applyConfig(const MeasurementInterface &mi)
 {
     // Save settings for port configuration
     _settings = mi;
 }
 
-bool CANBlastInterface::updateStatus()
+bool CANBlasterInterface::updateStatus()
 {
 
 }
 
-bool CANBlastInterface::readConfig()
+bool CANBlasterInterface::readConfig()
 {
 
 }
 
-bool CANBlastInterface::readConfigFromLink(rtnl_link *link)
+bool CANBlasterInterface::readConfigFromLink(rtnl_link *link)
 {
 
 }
 
-bool CANBlastInterface::supportsTimingConfiguration()
+bool CANBlasterInterface::supportsTimingConfiguration()
 {
     return _config.supports_timing;
 }
 
-bool CANBlastInterface::supportsCanFD()
+bool CANBlasterInterface::supportsCanFD()
 {
     return _config.supports_canfd;
 }
 
-bool CANBlastInterface::supportsTripleSampling()
+bool CANBlasterInterface::supportsTripleSampling()
 {
     return false;
 }
 
-unsigned CANBlastInterface::getBitrate() {
+unsigned CANBlasterInterface::getBitrate() {
 
 }
 
-uint32_t CANBlastInterface::getCapabilities()
+uint32_t CANBlasterInterface::getCapabilities()
 {
     uint32_t retval =
         CanInterface::capability_config_os |
@@ -158,12 +157,12 @@ uint32_t CANBlastInterface::getCapabilities()
     return retval;
 }
 
-bool CANBlastInterface::updateStatistics()
+bool CANBlasterInterface::updateStatistics()
 {
     return updateStatus();
 }
 
-uint32_t CANBlastInterface::getState()
+uint32_t CANBlasterInterface::getState()
 {
     /*
     switch (_status.can_state) {
@@ -176,46 +175,46 @@ uint32_t CANBlastInterface::getState()
     }*/
 }
 
-int CANBlastInterface::getNumRxFrames()
+int CANBlasterInterface::getNumRxFrames()
 {
     return _status.rx_count;
 }
 
-int CANBlastInterface::getNumRxErrors()
+int CANBlasterInterface::getNumRxErrors()
 {
     return _status.rx_errors;
 }
 
-int CANBlastInterface::getNumTxFrames()
+int CANBlasterInterface::getNumTxFrames()
 {
     return _status.tx_count;
 }
 
-int CANBlastInterface::getNumTxErrors()
+int CANBlasterInterface::getNumTxErrors()
 {
     return _status.tx_errors;
 }
 
-int CANBlastInterface::getNumRxOverruns()
+int CANBlasterInterface::getNumRxOverruns()
 {
     return _status.rx_overruns;
 }
 
-int CANBlastInterface::getNumTxDropped()
+int CANBlasterInterface::getNumTxDropped()
 {
     return _status.tx_dropped;
 }
 
-int CANBlastInterface::getIfIndex() {
+int CANBlasterInterface::getIfIndex() {
     return _idx;
 }
 
-const char *CANBlastInterface::cname()
+const char *CANBlasterInterface::cname()
 {
     return _name.toStdString().c_str();
 }
 
-void CANBlastInterface::open()
+void CANBlasterInterface::open()
 {
     _socket = new QUdpSocket(this);
     if(_socket->bind(QHostAddress::LocalHost, 20001))
@@ -233,23 +232,23 @@ void CANBlastInterface::open()
 
 }
 
-void CANBlastInterface::close()
+void CANBlasterInterface::close()
 {
     _heartbeat_timer->stop();
     _isOpen = false;
 }
 
-bool CANBlastInterface::isOpen()
+bool CANBlasterInterface::isOpen()
 {
     return _isOpen;
 }
 
-void CANBlastInterface::sendMessage(const CanMessage &msg) {
+void CANBlasterInterface::sendMessage(const CanMessage &msg) {
 
 
 }
 
-void CANBlastInterface::udpRead()
+void CANBlasterInterface::udpRead()
 {
     // when data comes in
     QByteArray buffer;
@@ -274,7 +273,7 @@ void CANBlastInterface::udpRead()
 
 }
 
-void CANBlastInterface::udpHeartbeat()
+void CANBlasterInterface::udpHeartbeat()
 {
     if(_isOpen)
     {
@@ -284,7 +283,7 @@ void CANBlastInterface::udpHeartbeat()
     }
 }
 
-bool CANBlastInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
+bool CANBlasterInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
 {
 
     // NOTE: This only works with standard CAN frames right now!

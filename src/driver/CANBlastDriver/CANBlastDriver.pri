@@ -2,12 +2,12 @@ CONFIG += c++11
 QT += network
 
 SOURCES += \
-    $$PWD/CANBlastInterface.cpp \
-    $$PWD/CANBlastDriver.cpp
+    $$PWD/CANBlasterDriver.cpp \
+    $$PWD/CANBlasterInterface.cpp
 
 HEADERS  += \
-    $$PWD/CANBlastInterface.h \
-    $$PWD/CANBlastDriver.h
+    $$PWD/CANBlasterDriver.h \
+    $$PWD/CANBlasterInterface.h
 
 FORMS +=
 

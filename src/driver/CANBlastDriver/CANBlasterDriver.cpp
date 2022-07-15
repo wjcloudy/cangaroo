@@ -20,8 +20,8 @@
 */
 
 
-#include "CANBlastDriver.h"
-#include "CANBlastInterface.h"
+#include "CANBlasterDriver.h"
+#include "CANBlasterInterface.h"
 #include <core/Backend.h>
 #include <driver/GenericCanSetupPage.h>
 
@@ -37,37 +37,37 @@
 #include <QtSerialPort/QSerialPortInfo>
 
 
-CANBlastDriver::CANBlastDriver(Backend &backend)
+CANBlasterDriver::CANBlasterDriver(Backend &backend)
   : CanDriver(backend),
     setupPage(new GenericCanSetupPage())
 {
     QObject::connect(&backend, SIGNAL(onSetupDialogCreated(SetupDialog&)), setupPage, SLOT(onSetupDialogCreated(SetupDialog&)));
 }
 
-CANBlastDriver::~CANBlastDriver() {
+CANBlasterDriver::~CANBlasterDriver() {
 }
 
-bool CANBlastDriver::update() {
+bool CANBlasterDriver::update() {
 
     // TODO: Listen for multicast packets for discovery of canblaster servers
 
     // Testing
     int interface_cnt = 0;
-    CANBlastInterface *intf = createOrUpdateInterface(interface_cnt++, "Test CANBlast", false);
+    CANBlasterInterface *intf = createOrUpdateInterface(interface_cnt++, "Test CANblaster", false);
 
     return true;
 }
 
-QString CANBlastDriver::getName() {
-    return "CANblast";
+QString CANBlasterDriver::getName() {
+    return "CANblaster";
 }
 
 
 
-CANBlastInterface *CANBlastDriver::createOrUpdateInterface(int index, QString name, bool fd_support) {
+CANBlasterInterface *CANBlasterDriver::createOrUpdateInterface(int index, QString name, bool fd_support) {
 
     foreach (CanInterface *intf, getInterfaces()) {
-        CANBlastInterface *scif = dynamic_cast<CANBlastInterface*>(intf);
+        CANBlasterInterface *scif = dynamic_cast<CANBlasterInterface*>(intf);
 		if (scif->getIfIndex() == index) {
 			scif->setName(name);
             return scif;
@@ -75,7 +75,7 @@ CANBlastInterface *CANBlastDriver::createOrUpdateInterface(int index, QString na
 	}
 
 
-    CANBlastInterface *scif = new CANBlastInterface(this, index, name, fd_support);
+    CANBlasterInterface *scif = new CANBlasterInterface(this, index, name, fd_support);
     addInterface(scif);
     return scif;
 }

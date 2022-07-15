@@ -25,19 +25,19 @@
 #include <core/Backend.h>
 #include <driver/CanDriver.h>
 
-class CANBlastInterface;
+class CANBlasterInterface;
 class SetupDialogInterfacePage;
 class GenericCanSetupPage;
 
-class CANBlastDriver: public CanDriver {
+class CANBlasterDriver: public CanDriver {
 public:
-    CANBlastDriver(Backend &backend);
-    virtual ~CANBlastDriver();
+    CANBlasterDriver(Backend &backend);
+    virtual ~CANBlasterDriver();
 
     virtual QString getName();
     virtual bool update();
 
 private:
-    CANBlastInterface *createOrUpdateInterface(int index, QString name, bool fd_support);
+    CANBlasterInterface *createOrUpdateInterface(int index, QString name, bool fd_support);
     GenericCanSetupPage *setupPage;
 };
