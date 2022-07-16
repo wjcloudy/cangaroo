@@ -419,7 +419,6 @@ void RawTxWindow::sendRawMessage()
 
     bool en_extended = ui->checkBox_IsExtended->isChecked();
     bool en_rtr = ui->checkBox_IsRTR->isChecked();
-    bool en_errorframe = ui->checkBox_IsErrorFrame->isChecked();
 
     uint8_t data_int[64];
     int data_ctr = 0;
@@ -532,7 +531,7 @@ void RawTxWindow::sendRawMessage()
 
     msg.setExtended(en_extended);
     msg.setRTR(en_rtr);
-    msg.setErrorFrame(en_errorframe);
+    msg.setErrorFrame(false);
 
     if(ui->checkbox_BRS->isChecked())
         msg.setBRS(true);

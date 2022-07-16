@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>756</width>
-    <height>258</height>
+    <height>220</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>371</width>
-    <height>250</height>
+    <height>220</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -151,19 +151,6 @@
     <string>Extended ID</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox_IsErrorFrame">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>160</y>
-     <width>151</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Error Frame</string>
-   </property>
-  </widget>
   <widget class="QComboBox" name="comboBoxInterface">
    <property name="geometry">
     <rect>
@@ -194,7 +181,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>220</y>
+     <y>190</y>
      <width>151</width>
      <height>23</height>
     </rect>
@@ -207,7 +194,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>190</y>
+     <y>160</y>
      <width>151</width>
      <height>23</height>
     </rect>
@@ -1836,7 +1823,6 @@
   <tabstop>comboBoxDLC</tabstop>
   <tabstop>checkBox_IsExtended</tabstop>
   <tabstop>checkBox_IsRTR</tabstop>
-  <tabstop>checkBox_IsErrorFrame</tabstop>
   <tabstop>checkbox_FD</tabstop>
   <tabstop>checkbox_BRS</tabstop>
   <tabstop>fieldByte0_0</tabstop>
