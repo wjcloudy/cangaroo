@@ -88,7 +88,7 @@
              <item>
               <widget class="QPushButton" name="btAddNetwork">
                <property name="text">
-                <string>Add Network...</string>
+                <string>Add Network</string>
                </property>
               </widget>
              </item>
@@ -96,6 +96,13 @@
               <widget class="QPushButton" name="btRemoveNetwork">
                <property name="text">
                 <string>Remove Network</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btRefreshNetworks">
+               <property name="text">
+                <string>Refresh</string>
                </property>
               </widget>
              </item>

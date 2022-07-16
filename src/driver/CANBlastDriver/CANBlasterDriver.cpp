@@ -51,6 +51,8 @@ CANBlasterDriver::~CANBlasterDriver() {
 
 bool CANBlasterDriver::update() {
 
+    deleteAllInterfaces();
+
     // TODO: Listen for multicast packets for discovery of canblaster servers
     QUdpSocket udpSocket;
     QHostAddress groupAddress;

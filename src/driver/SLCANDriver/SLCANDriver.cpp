@@ -49,6 +49,8 @@ SLCANDriver::~SLCANDriver() {
 
 bool SLCANDriver::update() {
 
+    deleteAllInterfaces();
+
     int interface_cnt = 0;
 
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {

@@ -69,12 +69,14 @@ private slots:
     void executeReloadCanDbs();
     void executeDeleteCanDb();
 
+
+
     void executeAddInterface();
     void executeDeleteInterface();
 
     void on_btAddNetwork_clicked();
     void on_btRemoveNetwork_clicked();
-
+    void on_btRefreshNetworks_clicked();
 
 private:
     Ui::SetupDialog *ui;
