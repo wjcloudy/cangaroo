@@ -4,6 +4,7 @@ open source can bus analyzer
 * Supports CANable / CANable 2 SLCAN interfaces on Windows and Linux
 * Supports Candlelight interfaces on Windows
 * Supports Socketcan interfaces on Linux
+* Support CANblaster socketCAN over UDP on Windows and Linux
 * Initial support for transmit / receive of CANFD packets
 
 
