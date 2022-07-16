@@ -41,6 +41,7 @@ CANBlasterInterface::CANBlasterInterface(CANBlasterDriver *driver, int index, QS
   : CanInterface((CanDriver *)driver),
 	_idx(index),
     _isOpen(false),
+    _requestOpen(false),
     _name(name),
     _ts_mode(ts_mode_SIOCSHWTSTAMP),
     _socket(NULL)
@@ -51,8 +52,8 @@ CANBlasterInterface::CANBlasterInterface(CANBlasterDriver *driver, int index, QS
 
     _config.supports_canfd = fd_support;
 
-    _heartbeat_timer = new QTimer(this);
-    connect(_heartbeat_timer, &QTimer::timeout, this, &CANBlasterInterface::udpHeartbeat);
+    // Record start time
+    gettimeofday(&_heartbeat_time,NULL);
 
 }
 
@@ -216,27 +217,11 @@ const char *CANBlasterInterface::cname()
 
 void CANBlasterInterface::open()
 {
-    _socket = new QUdpSocket(this);
-
-    //if(_socket->bind(QHostAddress::LocalHost, 20001))
-    if(_socket->bind(QHostAddress(getName()), 20001))
-    {
-        _heartbeat_timer->start(500);
-        _isOpen = true;
-    }
-    else
-    {
-        perror("CANBlaster Bind Failed!");
-    }
-    //connect(_socket, SIGNAL(readyRead()), this, SLOT(udpRead()));
-
-
-
+    _requestOpen = true;
 }
 
 void CANBlasterInterface::close()
 {
-    _heartbeat_timer->stop();
     _isOpen = false;
 }
 
@@ -247,21 +232,44 @@ bool CANBlasterInterface::isOpen()
 
 void CANBlasterInterface::sendMessage(const CanMessage &msg) {
 
-
-}
-
-void CANBlasterInterface::udpHeartbeat()
-{
-    if(_isOpen)
-    {
-        QByteArray Data;
-        Data.append("Heartbeat");
-        _socket->writeDatagram(Data, QHostAddress::LocalHost, 20002);
-    }
 }
 
 bool CANBlasterInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
 {
+    // Open socket from CanListener thread
+    if(_requestOpen == true)
+    {
+        _requestOpen = false;
+        _socket = new QUdpSocket();
+
+        if(_socket->bind(QHostAddress::AnyIPv4, 20001))
+        {
+            _isOpen = true;
+        }
+        else
+        {
+            perror("CANBlaster Bind Failed!");
+            _isOpen = false;
+        }
+    }
+
+
+    // Record start time
+    struct timeval now;
+    gettimeofday(&now,NULL);
+
+    if(now.tv_sec - _heartbeat_time.tv_sec > 1)
+    {
+
+        _heartbeat_time.tv_sec = now.tv_sec;
+
+        if(_isOpen)
+        {
+            QByteArray Data;
+            Data.append("Heartbeat");
+            _socket->writeDatagram(Data, QHostAddress(getName()), 20002);
+        }
+    }
 
     // NOTE: This only works with standard CAN frames right now!
 

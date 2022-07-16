@@ -79,7 +79,6 @@ public:
 
     virtual void sendMessage(const CanMessage &msg);
     virtual bool readMessage(CanMessage &msg, unsigned int timeout_ms);
-    void udpHeartbeat();
 
     virtual bool updateStatistics();
     virtual uint32_t getState();
@@ -103,6 +102,7 @@ private:
 
     int _idx;
     bool _isOpen;
+    bool _requestOpen;
     QString _name;
 
     MeasurementInterface _settings;
@@ -111,8 +111,8 @@ private:
     can_status_t _status;
     ts_mode_t _ts_mode;
 
+    struct timeval _heartbeat_time;
     QUdpSocket* _socket;
-    QTimer* _heartbeat_timer;
     const char *cname();
     bool updateStatus();
 

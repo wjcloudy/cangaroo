@@ -97,7 +97,7 @@ bool CANBlasterDriver::update() {
         gettimeofday(&tv,NULL);
 
         // Iterate until timer expires
-        if(tv.tv_sec - start_time.tv_sec > 1)
+        if(tv.tv_sec - start_time.tv_sec > 2)
             break;
     }
     fprintf(stderr, "CANblaster: stop listen\r\n");
