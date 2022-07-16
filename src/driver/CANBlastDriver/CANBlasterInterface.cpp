@@ -236,6 +236,10 @@ void CANBlasterInterface::sendMessage(const CanMessage &msg) {
 
 bool CANBlasterInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
 {
+
+    // Don't saturate the thread. Read the buffer every 1ms.
+    QThread().usleep(250);
+
     // Open socket from CanListener thread
     if(_requestOpen == true)
     {
@@ -273,11 +277,9 @@ bool CANBlasterInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
 
     // NOTE: This only works with standard CAN frames right now!
 
-    // Don't saturate the thread. Read the buffer every 1ms.
-    QThread().msleep(1);
-
     // Process all pending datagrams
-    while (_socket->hasPendingDatagrams())
+    // TODO: Could switch to if from while but the caller expects 1 can frame
+    if (_socket->hasPendingDatagrams())
     {
         can_frame frame;
         QHostAddress address;
@@ -318,6 +320,10 @@ bool CANBlasterInterface::readMessage(CanMessage &msg, unsigned int timeout_ms)
             }
 
             return true;
+        }
+        else
+        {
+            return false;
         }
     }
     return false;
