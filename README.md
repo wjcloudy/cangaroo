@@ -1,11 +1,11 @@
 # cangaroo
 open source can bus analyzer
 
-* Supports CANable / CANable 2 SLCAN interfaces on Windows and Linux
+* Supports [CANable / CANable 2](http://canable.io) SLCAN interfaces on Windows and Linux
 * Supports Candlelight interfaces on Windows
 * Supports Socketcan interfaces on Linux
-* Support CANblaster socketCAN over UDP on Windows and Linux
-* Initial support for transmit / receive of CANFD packets
+* Support [CANblaster](https://github.com/normaldotcom/canblaster), forwards socketCAN traffic over UDP to Cangaroo
+* Initial support for transmit / receive of CANFD packets on [CANable 2.0](http://canable.io/)
 
 
 written by Hubert Denkmair <hubert@denkmair.de>
