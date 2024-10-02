@@ -17,12 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Qt
-      run: echo "Qt5_Dir=$Qt5_Dir" >> $GITHUB_ENV
-
-    - name: Configure CMake
-      env:
-        Qt5_Dir: ${{ secrets.Qt5_Dir }}
+    - name: Install Qt
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential git qt5-qmake qtbase5-dev libnl-3-dev libnl-route-3-dev cmake qt5-default libqt5serialport5 libqt5serialport5-dev libqt5charts5 libqt5charts5-dev
+    - name: Configure QMake
       run: |
         qmake cangaroo.pro CONFIG+=release QTC_SOURCE="$GITHUB_WORKSPACE/qtcreator" QTC_BUILD="$GITHUB_WORKSPACE/qtcreator"
 
