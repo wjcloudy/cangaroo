@@ -25,7 +25,8 @@ jobs:
       run: |
         qmake cangaroo.pro CONFIG+=release QTC_SOURCE="$GITHUB_WORKSPACE/qtcreator" QTC_BUILD="$GITHUB_WORKSPACE/qtcreator"
 
-
+    - name: Build
+      run: make -j4
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
